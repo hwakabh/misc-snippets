@@ -1,13 +1,13 @@
-#!/bin/bas
-## Before you run:
-## - Make sure the directories would have already created
+#!/bin/bash
+## Before you run the script:
+## - Make sure the backup directories would have already created
 
-## - Adjust variables below for your environments
-##   e.g.
-##   BKDIR=/var/backup/gitlab.bk
-##   DEFDIR=/var/opt/gitlab/backups
-BKDIR=/var/backup/gitlab.bk
-DEFDIR=/var/opt/gitlab/backups
+## - Change variables below for your environments
+##   examples:
+##     BKDIR=/var/backup/gitlab.bk
+##     DEFDIR=/var/opt/gitlab/backups
+BKDIR=PATH_TO_DIR_BACKUP_SAVED
+DEFDIR=PATH_TO_TARGET_DIR_TO_BACKUP
 
 # Get GitLab Configurations backups
 tar cfz ${BKDIR}/$(date "+%s_%Y_%m_%d_etc_gitlab.tar.gz") -C /etc gitlab
