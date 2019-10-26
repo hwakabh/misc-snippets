@@ -56,7 +56,7 @@ if ($args.Length -eq 0) {
     writeEvents -level "Information" -msg "The script accepted proper argument, starting main operations..."
 
     try {
-        Connect-VIServer -Server $VC -User $USERNAME -Password $PASSWORD
+        Connect-VIServer -Server $VC -User $USERNAME -Password $PASSWORD |Out-Null
         writeEvents -level "Information" -msg "Successfully connected vCenter Server [ $VC ]"
     } catch {
         Disconnect-VIServer -Server $VC -Confirm:$false
