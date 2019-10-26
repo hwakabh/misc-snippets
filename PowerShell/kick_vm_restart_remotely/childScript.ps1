@@ -66,7 +66,7 @@ if ($args.Length -eq 0) {
 
     if ($(getVmPowerState -vmname $args[0]) -eq $false) {
         Disconnect-VIServer -Server $VC -Confirm:$false
-        writeEvents -level "Error" -msg "virutal-machine [ $args[0] ] not found on vCenter [ $VC ]"
+        writeEvents -level "Error" -msg "virutal-machine [ $args ] not found on vCenter [ $VC ]"
         exit
     } else {
         if ((restartVm -vmname $args[0]) -eq $false) {
