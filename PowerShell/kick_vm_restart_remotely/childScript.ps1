@@ -1,8 +1,12 @@
 # Credentials
-$VC = "vcsa01.nfvlab.local"
-$USERNAME = "administrator@vsphere.local"
-$PASSWORD = "VMware1!"
+# NOTE: this scripts pre-requires password.secret file generated with Get-Credential cmdlet
+$vCenter = "vcsa01.nfvlab.local"
+$username = "administrator@vsphere.local"
+$password = Get-Content "password.secret" | ConvertTo-SecureString
+$credential = New-Object -TypeName System.Management.Automation.PsCredential `
+    -ArgumentList $username, $password
 $eventSrcName = "childScript"
+
 
 # Logging Properties : Create Event source if not exist
 if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Application | `
@@ -56,22 +60,22 @@ if ($args.Length -eq 0) {
     writeEvents -level "Information" -msg "The script accepted proper argument, starting main operations..."
 
     try {
-        Connect-VIServer -Server $VC -User $USERNAME -Password $PASSWORD |Out-Null
-        writeEvents -level "Information" -msg "Successfully connected vCenter Server [ $VC ]"
+        Connect-VIServer -Server $vCenter -Credential $credential |Out-Null
+        writeEvents -level "Information" -msg "Successfully connected vCenter Server [ $vCenter ]"
     } catch {
-        Disconnect-VIServer -Server $VC -Confirm:$false
-        writeEvents -level "Error" -msg "Failed to connect vCenter Server [ $VC ]. Exit the program."
+        Disconnect-VIServer -Server $vCenter -Confirm:$false
+        writeEvents -level "Error" -msg "Failed to connect vCenter Server [ $vCenter ]. Exit the program."
         exit
     }
 
     if ($(getVmPowerState -vmname $args[0]) -eq $false) {
-        Disconnect-VIServer -Server $VC -Confirm:$false
-        writeEvents -level "Error" -msg "virutal-machine [ $args ] not found on vCenter [ $VC ]"
+        Disconnect-VIServer -Server $vCenter -Confirm:$false
+        writeEvents -level "Error" -msg "virutal-machine [ $args[0] ] not found on vCenter [ $vCenter ]"
         exit
     } else {
         if ((restartVm -vmname $args[0]) -eq $false) {
             writeEvents -level "Error" -msg "Tried to restart VM, but failed unexpectedly."
-            Disconnect-VIServer -Server $VC -Confirm:$false
+            Disconnect-VIServer -Server $vCenter -Confirm:$false
             exit
         } else {
             writeEvents -level "Information" -msg "The script worked completely. Exit the program."
