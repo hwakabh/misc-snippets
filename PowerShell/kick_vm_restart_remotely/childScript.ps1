@@ -63,7 +63,7 @@ if ($args.Length -eq 0) {
         Connect-VIServer -Server $vCenter -Credential $credential |Out-Null
         writeEvents -level "Information" -msg "Successfully connected vCenter Server [ $vCenter ]"
     } catch {
-        Disconnect-VIServer -Server $vCenter -Confirm:$false
+#        Disconnect-VIServer -Server $vCenter -Confirm:$false
         writeEvents -level "Error" -msg "Failed to connect vCenter Server [ $vCenter ]. Exit the program."
         exit
     }
