@@ -9,9 +9,10 @@ function showHelpMenu {
 }
 
 function testConnection ($target) {
+    # TODO: Modify printing message not in stdout but eventvwr
     Write-Host "WIP : testing L4 connction."
-    # with TestNetConnection cmdlet
-    # return: Boolean value whether it could be connected or not
+    [Boolean] $isAlive = Test-NetConnection -ComputerName $target -Port 5985 -InformationLevel Quiet
+    return $isAlive
 }
 
 function callChildScript ($filepath) {
@@ -33,10 +34,10 @@ if ($args.Length -eq 0) {
         exit
     }
 
-    if (testConnection($primaryChildIPp)) {
-        Write-Host "INFO : Kick script on rimary childScript ..."
+    if (testConnection -target $primaryChildIp) {
+        Write-Host "INFO : Kick script on primary childScript ..."
         exit
-    } elseif (testConnection($secondaryChildIp)) {
+    } elseif (testConnection -target $secondaryChildIp) {
         Write-Host "WARNING : Kick script on secondary childScript..."
         exit
     } else {
