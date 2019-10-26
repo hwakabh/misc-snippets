@@ -1,8 +1,9 @@
 # Credentials
 # NOTE: this scripts pre-requires password.secret file generated with Get-Credential cmdlet
+$passwordFilePath = Join-Path (Get-Location).Path "password.secret"
 $vCenter = "vcsa01.nfvlab.local"
 $username = "administrator@vsphere.local"
-$password = Get-Content "password.secret" | ConvertTo-SecureString
+$password = Get-Content $passwordFilePath | ConvertTo-SecureString
 $credential = New-Object -TypeName System.Management.Automation.PsCredential `
     -ArgumentList $username, $password
 $eventSrcName = "childScript"
