@@ -59,19 +59,19 @@ if ($args.Length -eq 0) {
         Connect-VIServer -Server $VC -User $USERNAME -Password $PASSWORD
         writeEvents -level "Information" -msg "Successfully connected vCenter Server [ $VC ]"
     } catch {
-        Disconnect-VIServer -Server $VC -Force
+        Disconnect-VIServer -Server $VC -Confirm:$false
         writeEvents -level "Error" -msg "Failed to connect vCenter Server [ $VC ]. Exit the program."
         exit
     }
 
     if ($(getVmPowerState -vmname $args[0]) -eq $false) {
-        Disconnect-VIServer -Server $VC -Force
+        Disconnect-VIServer -Server $VC -Confirm:$false
         writeEvents -level "Error" -msg "virutal-machine [ $args[0] ] not found on vCenter [ $VC ]"
         exit
     } else {
         if ((restartVm -vmname $args[0]) -eq $false) {
             writeEvents -level "Error" -msg "Tried to restart VM, but failed unexpectedly."
-            Disconnect-VIServer -Server $VC -Force
+            Disconnect-VIServer -Server $VC -Confirm:$false
             exit
         } else {
             writeEvents -level "Information" -msg "The script worked completely. Exit the program."
