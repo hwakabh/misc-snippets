@@ -3,10 +3,9 @@ $VC = "vcsa01.nfvlab.local"
 $USERNAME = "administrator@vsphere.local"
 $PASSWORD = "VMware1!"
 
-function showHelpMenu {
-    Write-Host "WIP: Syntax here..."
+function writeEvents ($level, $msg) {
+    Write-Host "WIP: Functions of writing event logs to eventvwr..."
 }
-
 
 function getVmPowerState ($vmname) {
     Write-Host "WIP: Functions of getting VM power state..."
@@ -22,22 +21,18 @@ function restartVm ($vmname) {
 # Connect-VIServer -Server $VC -User $USERNAME -Password $PASSWORD
 
 # Check command line arguments
-# ... Checking numbers of $args
 if ($args.Length -eq 0) {
     Write-Host "ERROR: Please provide some arguments..."
-    showHelpMenu
+    writeEvents("ERROR", "childScript.ps1 : The script was kicked without any arguments.")
+
 } elseif ($args.Length -eq 1) {
-    # ... Checking contents of $args[0]
-    if (($args[0] -eq "--help") -or ($args[0] -eq "-h")) {
-        Write-Host "WIP: Help menu here..."
-        showHelpMenu
-    } else {
-        Write-Host "Starting to operation : Log to eventvwr"
-        getVmPowerState("SOME_VM_NAME")
-        restartVm("SOME_VM_NAME")
-        Write-Host "End operation."
-    }
+    Write-Host "Starting to operation : Log to eventvwr"
+    writeEvents("INFO", "childScript.ps1 : The script accepted proper argument, starting main operations...")
+    getVmPowerState("SOME_VM_NAME")
+    restartVm("SOME_VM_NAME")
+    writeEvents("INFO", "childScript.ps1 : The script worked completely. Exit the program.")
+
 } else {
     Write-Host "ERROR: Too many arguments."
-    showHelpMenu
+    writeEvents("ERROR", "childScript.ps1 : Too many arguments were provided unexpectedly.")
 } 
