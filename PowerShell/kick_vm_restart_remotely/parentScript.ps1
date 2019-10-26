@@ -51,18 +51,26 @@ function testConnection ($target) {
 }
 
 function callChildScript ($target, $path, $vmname) {
-    $msg = "Start to kick remote ps1 file [ $path ] on remote server [ $target ].`n
-        Note that the virtual-machine [ $vmname ] would be restarted on hardware-level.
-        "
+    $isRemoteFileExist = Invoke-Command -ComputerName $target `
+        -ScriptBlock { Test-Path $args[0] } `
+        -ArgumentList $path
+    if ($isRemoteFileExist -eq $true) {
+        $msg = "Start to kick remote ps1 file [ $path ] on remote server [ $target ].`n
+            Note that the virtual-machine [ $vmname ] would be restarted on hardware-level.
+            "
 
-    writeEvents -level "Information" -msg $msg
+#        Write-Host $msg
 
-    writeEvents -level "Information" -msg "Running command [ powershell.exe $path $vmname ] on $target ..."
-    Invoke-Command -ComputerName $target `
-        -ScriptBlock { powershell.exe $args[0] $args[1] } `
-        -ArgumentList $path, $vmname
+        writeEvents -level "Information" -msg $msg
+        writeEvents -level "Information" -msg "Running command [ powershell.exe $path $vmname ] on $target ..."
+        Invoke-Command -ComputerName $target `
+            -ScriptBlock { powershell.exe $args[0] $args[1] } `
+            -ArgumentList $path, $vmname
+    } else {
+#        Write-Host "Failed to confirm remote script existence."
+        writeEvents -level "Error" -msg "childScript.ps1 does not exist on remote server, check path."
+    }
     # TODO: getReturn codes and return to main function
-    # TODO: check file exists or not
 }
 
 
@@ -86,12 +94,14 @@ if ($args.Length -eq 0) {
             callChildScript -target $primaryChildIp -path $filePath -vmname $args[0]
 
         } catch {
+ #           Write-Host "Failed to call script on primary server."
             writeEvents -level "Warning" `
                 -msg "Failed to callChildScript on primary server, continue on secondary one ..."
             try {
                 callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
 
             } catch {
+#                Write-Host "Failed to call script on secondary server."
                 writeEvents -level "Error" `
                     -msg "Failed to kick childScript.ps1 both on primary/secondary."
                 exit
