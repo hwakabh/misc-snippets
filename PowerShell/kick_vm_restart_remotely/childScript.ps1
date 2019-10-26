@@ -10,9 +10,6 @@ if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Applica
     New-EventLog -LogName Application -Source $eventSrcName
     Write-EventLog -LogName Application -Source $eventSrcName -EntryType Information -EventId 1001 `
         -Message "Event Source $eventSrcName not found, created."
-} else {
-    Write-EventLog -LogName Application -Source $eventSrcName -EntryType Information -EventId 1001 `
-        -Message "Event Source $eventSrcName has already exited."
 }
 
 
