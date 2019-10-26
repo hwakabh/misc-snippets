@@ -37,8 +37,9 @@ function writeEvents ([String] $level, [String] $msg) {
 }
 
 function getVmPowerState ($vmname) {
-    Write-Host "WIP: Functions of getting VM power state..."
-    Write-Host "Getting power status of $vmname ..."
+    writeEvents -level "Information" -msg "Getting power status of virtual-machine [ $vmname ] ..."
+    Get-VM -Name $vmname
+    return $?
 }
 
 function restartVm ($vmname) {
@@ -47,7 +48,6 @@ function restartVm ($vmname) {
 }
 
 
-# Connect-VIServer -Server $VC -User $USERNAME -Password $PASSWORD
 
 # Check command line arguments
 if ($args.Length -eq 0) {
@@ -57,11 +57,24 @@ if ($args.Length -eq 0) {
 } elseif ($args.Length -eq 1) {
     writeEvents -level "Information" -msg "The script accepted proper argument, starting main operations..."
 
+    try {
+        Connect-VIServer -Server $VC -User $USERNAME -Password $PASSWORD
+        writeEvents -level "Information" -msg "Successfully connected vCenter Server [ $VC ]"
+    } catch {
+        Disconnect-VIServer -Server $VC -Force
+        writeEvents -level "Error" -msg "Failed to connect vCenter Server [ $VC ]. Exit the program."
+        exit
+    }
 
-    getVmPowerState("SOME_VM_NAME")
-    restartVm("SOME_VM_NAME")
-    writeEvents -level "Information" -msg "The script worked completely. Exit the program."
-    exit
+    if ($(getVmPowerState -vmname $args[0]) -eq $false) {
+        Disconnect-VIServer -Server $VC -Force
+        writeEvents -level "Error" -msg "virutal-machine [ $args[0] ] not found on vCenter [ $VC ]"
+        exit
+    } else {
+        restartVm -vmname $args[0]
+        writeEvents -level "Information" -msg "The script worked completely. Exit the program."
+        exit
+    }
 
 } else {
     writeEvents -level "Error" -msg "Too many arguments were provoded unexpectedly."
