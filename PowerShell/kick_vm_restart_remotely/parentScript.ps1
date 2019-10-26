@@ -4,13 +4,17 @@ $primaryChildIp = "172.16.110.29"
 $secondaryChildIp = "172.16.110.248"
 
 
+function showHelpMenu {
+    Write-Host "WIP : help menu here..."
+}
+
 function testConnection ($target) {
     Write-Host "WIP : testing L4 connction."
     # with TestNetConnection cmdlet
     # return: Boolean value whether it could be connected or not
 }
 
-function callChild ($filepath) {
+function callChildScript ($filepath) {
     Write-Host "WIP : kicking childScript remotely..."
     # with Invoke-Command cmdlet
     # TODO: getReturn codes and return to main function
@@ -19,6 +23,7 @@ function callChild ($filepath) {
 
 if ($args.Length -eq 0) {
     Write-Host "ERROR : Missing Arguments."
+    showHelpMenu
 } elseif ($args.Length -eq 1) {
     Write-Host "INFO Starting to operation..."
     if (testConnection($primaryChildIPp)) {
@@ -33,4 +38,5 @@ if ($args.Length -eq 0) {
         # sys.exit()
 } else {
     Write-Host "ERROR : Too many arguments..."
+    showHelpMenu
 }
