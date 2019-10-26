@@ -38,28 +38,33 @@ function showHelpMenu {
 }
 
 function testConnection ($target) {
-    # TODO: Modify printing message not in stdout but eventvwr
-    Write-Host "WIP : testing L4 connction."
+    writeEvents -level "Information" -msg "Testing L4 connectivities with remote server [ $target ]"
     [Boolean] $isAlive = Test-NetConnection -ComputerName $target -Port 5985 -InformationLevel Quiet
     return $isAlive
 }
 
 function callChildScript ($target, $path, $vmname) {
-    Write-Host "WIP : kicking childScript [ $path ] on remote server [ $target ]"
-    Write-Host "Call childScript.ps1 to restart virtual-machine [ $vmname ] ..."
+    $msg = "Start to kick remote ps1 file [ $path ] on remote server [ $target ].`n
+        Note that the virtual-machine [ $vmname ] would be restarted on hardware-level.
+        "
 
-    Invoke-Command -ComputerName $target -ScriptBlock { $PSVersionTable }
+    writeEvents -level "Information" -msg $msg
+
+    writeEvents -level "Information" -msg "Running command [ powershell.exe $path $vmname ] on $target ..."
+    Invoke-Command -ComputerName $target `
+        -ScriptBlock { powershell.exe $args[0] $args[1] } `
+        -ArgumentList $path, $vmname
     # TODO: getReturn codes and return to main function
     # TODO: check file exists or not
 }
 
 
 if ($args.Length -eq 0) {
-    writeEvents -level "Error" -msg "Missing arguments ..."
+    Write-Host "ERROR : Missing arguments ..."
     showHelpMenu
 
 } elseif ($args.Length -eq 1) {
-    writeEvents -level "Information" -msg "INFO Starting to operation..."
+    writeEvents -level "Information" -msg "Starting to main operation..."
 
     if (($args[0] -eq "--help") -or ($args[0] -eq "-h")) {
         showHelpMenu
@@ -70,33 +75,29 @@ if ($args.Length -eq 0) {
         $filePath = Join-Path $childDirPath $childFileName
         $ErrorActionPreference = "stop"
         try {
-            Write-Host "Trying to kick scripts remotely in primary server..."
             callChildScript -target $primaryChildIp -path $filePath -vmname $args[0]
 
         } catch {
-            Write-Host "WARNING : Failed to kick on primary server, continue on secondary one..."
-            Write-Host "Trying to kick scripts remotely in secondary server..."
-
+            writeEvents -level "Warning" `
+                -msg "Failed to callChildScript on primary server, continue on secondary one ..."
             try {
                 callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
 
             } catch {
-                Write-Host "ERROR : Failed to kick script both on primary/seconday ..."
+                writeEvents -level "Error" `
+                    -msg "Failed to kick childScript.ps1 both on primary/secondary."
                 exit
 
             }
         }
 
-        Write-Host "parentScripts worked successfully."
+        writeEvents -level "Information" `
+            -msg "parentScript completed its task successfully, exit the program."
         exit
 
-#    } elseif (testConnection -target $secondaryChildIp) {
-#        Write-Host "WARNING : Kick script on secondary childScript..."
-#        exit
-
     } else {
-        Write-Host "ERROR : Both of child unavailable..."
-        # Write eventvwr to ERROR message.
+        writeEvents -level "Error" `
+            -msg "testConnection failed both of child servers, check the connectivity."
         exit
 
     }
