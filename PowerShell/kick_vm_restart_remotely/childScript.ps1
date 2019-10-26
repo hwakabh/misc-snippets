@@ -2,9 +2,38 @@
 $VC = "vcsa01.nfvlab.local"
 $USERNAME = "administrator@vsphere.local"
 $PASSWORD = "VMware1!"
+$eventSrcName = "childScript"
 
-function writeEvents ($level, $msg) {
-    Write-Host "WIP: Functions of writing event logs to eventvwr..."
+# Logging Properties : Create Event source if not exist
+if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Application | `
+    Select-String $eventSrcName) -eq $null) {
+    New-EventLog -LogName Application -Source $eventSrcName
+    Write-EventLog -LogName Application -Source $eventSrcName -EntryType Information -EventId 1001 `
+        -Message "Event Source $eventSrcName not found, created."
+} else {
+    Write-EventLog -LogName Application -Source $eventSrcName -EntryType Information -EventId 1001 `
+        -Message "Event Source $eventSrcName has already exited."
+}
+
+
+function writeEvents ([String] $level, [String] $msg) {
+    $id = 0
+    if ($level -eq "Error") {
+        $id = 901
+    } elseif ($level -eq "Warning") {
+        $id = 801
+    } elseif ($level -eq "Information") {
+        $id = 1001
+    }
+
+    if ($id -ne 0) {
+        Write-EventLog -LogName Application -Source $eventSrcName `
+            -EntryType $level `
+            -EventId $id `
+            -Message $msg
+    } else {
+        Write-Host "EventID not accepted."
+    }
 }
 
 function getVmPowerState ($vmname) {
@@ -22,17 +51,20 @@ function restartVm ($vmname) {
 
 # Check command line arguments
 if ($args.Length -eq 0) {
-    Write-Host "ERROR: Please provide some arguments..."
-    writeEvents("ERROR", "childScript.ps1 : The script was kicked without any arguments.")
+    writeEvents -level "Error" -msg "The script was kicked without any arguments."
+    exit
 
 } elseif ($args.Length -eq 1) {
-    Write-Host "Starting to operation : Log to eventvwr"
-    writeEvents("INFO", "childScript.ps1 : The script accepted proper argument, starting main operations...")
+    writeEvents -level "Information" -msg "The script accepted proper argument, starting main operations..."
+
+
     getVmPowerState("SOME_VM_NAME")
     restartVm("SOME_VM_NAME")
-    writeEvents("INFO", "childScript.ps1 : The script worked completely. Exit the program.")
+    writeEvents -level "Information" -msg "The script worked completely. Exit the program."
+    exit
 
 } else {
-    Write-Host "ERROR: Too many arguments."
-    writeEvents("ERROR", "childScript.ps1 : Too many arguments were provided unexpectedly.")
+    writeEvents -level "Error" -msg "Too many arguments were provoded unexpectedly."
+    exit
+
 } 
