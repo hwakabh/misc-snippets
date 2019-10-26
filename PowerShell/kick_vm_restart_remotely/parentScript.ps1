@@ -1,8 +1,37 @@
 $childFileName = "childScript.ps1"
-$childDirPath = "C:\Users\Administrator\Documents"
+$childDirPath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely"
 $primaryChildIp = "172.16.110.248"
 $secondaryChildIp = "172.16.110.29"
+$eventSrcName = "parentScript"
 
+# Logging Properties : Create Event source if not exist
+if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Application | `
+    Select-String $eventSrcName) -eq $null) {
+    New-EventLog -LogName Application -Source $eventSrcName
+    Write-EventLog -LogName Application -Source $eventSrcName -EntryType Information -EventId 1001 `
+        -Message "Event Source $eventSrcName not found, created."
+}
+
+
+function writeEvents ([String] $level, [String] $msg) {
+    $id = 0
+    if ($level -eq "Error") {
+        $id = 901
+    } elseif ($level -eq "Warning") {
+        $id = 801
+    } elseif ($level -eq "Information") {
+        $id = 1001
+    }
+
+    if ($id -ne 0) {
+        Write-EventLog -LogName Application -Source $eventSrcName `
+            -EntryType $level `
+            -EventId $id `
+            -Message $msg
+    } else {
+        Write-Host "EventID not accepted."
+    }
+}
 
 function showHelpMenu {
     Write-Host "WIP : help menu here..."
@@ -15,20 +44,22 @@ function testConnection ($target) {
     return $isAlive
 }
 
-function callChildScript ($target, $path) {
+function callChildScript ($target, $path, $vmname) {
     Write-Host "WIP : kicking childScript [ $path ] on remote server [ $target ]"
-    Invoke-Command -ComputerName $target -ScriptBlock { Invoke-Expression $args[0] } -ArgumentList $path
+    Write-Host "Call childScript.ps1 to restart virtual-machine [ $vmname ] ..."
+
+    Invoke-Command -ComputerName $target -ScriptBlock { $PSVersionTable }
     # TODO: getReturn codes and return to main function
     # TODO: check file exists or not
 }
 
 
 if ($args.Length -eq 0) {
-    Write-Host "ERROR : Missing Arguments."
+    writeEvents -level "Error" -msg "Missing arguments ..."
     showHelpMenu
 
 } elseif ($args.Length -eq 1) {
-    Write-Host "INFO Starting to operation..."
+    writeEvents -level "Information" -msg "INFO Starting to operation..."
 
     if (($args[0] -eq "--help") -or ($args[0] -eq "-h")) {
         showHelpMenu
@@ -40,14 +71,14 @@ if ($args.Length -eq 0) {
         $ErrorActionPreference = "stop"
         try {
             Write-Host "Trying to kick scripts remotely in primary server..."
-            callChildScript -target $primaryChildIp -path $filePath
+            callChildScript -target $primaryChildIp -path $filePath -vmname $args[0]
 
         } catch {
             Write-Host "WARNING : Failed to kick on primary server, continue on secondary one..."
             Write-Host "Trying to kick scripts remotely in secondary server..."
 
             try {
-                callChildScript -target $secondaryChildIp -path $filePath
+                callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
 
             } catch {
                 Write-Host "ERROR : Failed to kick script both on primary/seconday ..."
@@ -56,7 +87,6 @@ if ($args.Length -eq 0) {
             }
         }
 
-        Write-Host $results
         Write-Host "parentScripts worked successfully."
         exit
 
