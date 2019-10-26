@@ -43,8 +43,9 @@ function getVmPowerState ($vmname) {
 }
 
 function restartVm ($vmname) {
-    Write-Host "WIP: Functions of restarting VM power state..."
-    Write-Host "Restarting $vmname ..."
+    writeEvents -level "Information" -msg "Restarting virtual-machine [ $vmname ] ..."
+    Restart-VM -VM $vmname -Confirm:$false
+    return $?
 }
 
 
@@ -71,9 +72,14 @@ if ($args.Length -eq 0) {
         writeEvents -level "Error" -msg "virutal-machine [ $args[0] ] not found on vCenter [ $VC ]"
         exit
     } else {
-        restartVm -vmname $args[0]
-        writeEvents -level "Information" -msg "The script worked completely. Exit the program."
-        exit
+        if ((restartVm -vmname $args[0]) -eq $false) {
+            writeEvents -level "Error" -msg "Tried to restart VM, but failed unexpectedly."
+            Disconnect-VIServer -Server $VC -Force
+            exit
+        } else {
+            writeEvents -level "Information" -msg "The script worked completely. Exit the program."
+            exit
+        }
     }
 
 } else {
