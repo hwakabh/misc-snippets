@@ -1,7 +1,7 @@
 $childFileName = "childScript.ps1"
-$childDirPath = "C:\Users\Administrator"
-$primaryChildIp = "172.16.110.29"
-$secondaryChildIp = "172.16.110.248"
+$childDirPath = "C:\Users\Administrator\Documents"
+$primaryChildIp = "172.16.110.248"
+$secondaryChildIp = "172.16.110.29"
 
 
 function showHelpMenu {
@@ -15,10 +15,11 @@ function testConnection ($target) {
     return $isAlive
 }
 
-function callChildScript ($filepath) {
-    Write-Host "WIP : kicking childScript remotely..."
-    # with Invoke-Command cmdlet
+function callChildScript ($target, $path) {
+    Write-Host "WIP : kicking childScript [ $path ] on remote server [ $target ]"
+    Invoke-Command -ComputerName $target -ScriptBlock { Invoke-Expression $args[0] } -ArgumentList $path
     # TODO: getReturn codes and return to main function
+    # TODO: check file exists or not
 }
 
 
@@ -34,16 +35,40 @@ if ($args.Length -eq 0) {
         exit
     }
 
-    if (testConnection -target $primaryChildIp) {
-        Write-Host "INFO : Kick script on primary childScript ..."
+    if ((testConnection -target $primaryChildIp) -or (testConnection -target $secondaryChildIp)) {
+        $filePath = Join-Path $childDirPath $childFileName
+        $ErrorActionPreference = "stop"
+        try {
+            Write-Host "Trying to kick scripts remotely in primary server..."
+            callChildScript -target $primaryChildIp -path $filePath
+
+        } catch {
+            Write-Host "WARNING : Failed to kick on primary server, continue on secondary one..."
+            Write-Host "Trying to kick scripts remotely in secondary server..."
+
+            try {
+                callChildScript -target $secondaryChildIp -path $filePath
+
+            } catch {
+                Write-Host "ERROR : Failed to kick script both on primary/seconday ..."
+                exit
+
+            }
+        }
+
+        Write-Host $results
+        Write-Host "parentScripts worked successfully."
         exit
-    } elseif (testConnection -target $secondaryChildIp) {
-        Write-Host "WARNING : Kick script on secondary childScript..."
-        exit
+
+#    } elseif (testConnection -target $secondaryChildIp) {
+#        Write-Host "WARNING : Kick script on secondary childScript..."
+#        exit
+
     } else {
         Write-Host "ERROR : Both of child unavailable..."
         # Write eventvwr to ERROR message.
         exit
+
     }
 
 } else {
