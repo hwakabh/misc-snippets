@@ -2,6 +2,7 @@ $childFileName = "childScript.ps1"
 $childDirPath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely"
 $primaryChildIp = "172.16.110.248"
 $secondaryChildIp = "172.16.110.29"
+$scriptName = $PSCommandPath.Split('\')[-1]
 $eventSrcName = "parentScript"
 
 # Logging Properties : Create Event source if not exist
@@ -34,7 +35,13 @@ function writeEvents ([String] $level, [String] $msg) {
 }
 
 function showHelpMenu {
-    Write-Host "WIP : help menu here..."
+    Write-Host "----- Usage"
+    Write-Host "Syntax: `n"
+    Write-Host "`t $scriptName VIRTUAL_MACHINE_NAME`n"
+    Write-Host "Arguments: `n"
+    Write-Host "`tVIRTUAL_MACHINE_NAME : Name of virtual-machine to restart`n"
+    Write-Host "Options: `n"
+    Write-Host "`t--help | -h : Display help menu (this page)`n"
 }
 
 function testConnection ($target) {
@@ -61,6 +68,7 @@ function callChildScript ($target, $path, $vmname) {
 
 if ($args.Length -eq 0) {
     Write-Host "ERROR : Missing arguments ..."
+    Write-Host "Please provide a virtual-machine name.`n"
     showHelpMenu
 
 } elseif ($args.Length -eq 1) {
@@ -104,5 +112,6 @@ if ($args.Length -eq 0) {
 
 } else {
     Write-Host "ERROR : Too many arguments..."
+    Write-Host "Restarting multiple virutal-machines at once is not supported, provide just one.`n"
     showHelpMenu
 }
