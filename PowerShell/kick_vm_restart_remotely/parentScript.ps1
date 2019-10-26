@@ -24,18 +24,27 @@ function callChildScript ($filepath) {
 if ($args.Length -eq 0) {
     Write-Host "ERROR : Missing Arguments."
     showHelpMenu
+
 } elseif ($args.Length -eq 1) {
     Write-Host "INFO Starting to operation..."
+
+    if (($args[0] -eq "--help") -or ($args[0] -eq "-h")) {
+        showHelpMenu
+        exit
+    }
+
     if (testConnection($primaryChildIPp)) {
         Write-Host "INFO : Kick script on rimary childScript ..."
-        # sys.exit()
-    elseif (testConnection($secondaryChildIp)) {
+        exit
+    } elseif (testConnection($secondaryChildIp)) {
         Write-Host "WARNING : Kick script on secondary childScript..."
-        # sys.exit()
-    else {
+        exit
+    } else {
         Write-Host "ERROR : Both of child unavailable..."
         # Write eventvwr to ERROR message.
-        # sys.exit()
+        exit
+    }
+
 } else {
     Write-Host "ERROR : Too many arguments..."
     showHelpMenu
