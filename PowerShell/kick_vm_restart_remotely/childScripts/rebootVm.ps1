@@ -6,7 +6,7 @@ $username = "administrator@vsphere.local"
 $password = Get-Content $passwordFilePath | ConvertTo-SecureString
 $credential = New-Object -TypeName System.Management.Automation.PsCredential `
     -ArgumentList $username, $password
-$eventSrcName = "childScript"
+$eventSrcName = "rebootVm.ps1"
 
 
 # Logging Properties : Create Event source if not exist

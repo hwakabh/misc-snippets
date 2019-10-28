@@ -1,16 +1,15 @@
-$childFileName = "childScript.ps1"
-$childDirPath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely\childScripts"
 $primaryChildIp = "172.16.110.248"
 $secondaryChildIp = "172.16.110.29"
 $scriptName = $PSCommandPath.Split('\')[-1]
-$eventSrcName = "parentScript"
+$childFileName = "restartVm.ps1"
+$childDirPath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely\childScripts"
 
 # Logging Properties : Create Event source if not exist
 if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Application | `
-    Select-String $eventSrcName) -eq $null) {
-    New-EventLog -LogName Application -Source $eventSrcName
-    Write-EventLog -LogName Application -Source $eventSrcName -EntryType Information -EventId 1001 `
-        -Message "Event Source $eventSrcName not found, created."
+    Select-String $scriptName) -eq $null) {
+    New-EventLog -LogName Application -Source $scriptName
+    Write-EventLog -LogName Application -Source $scriptName -EntryType Information -EventId 1001 `
+        -Message "Event Source $scriptName not found, created."
 }
 
 
@@ -25,7 +24,7 @@ function writeEvents ([String] $level, [String] $msg) {
     }
 
     if ($id -ne 0) {
-        Write-EventLog -LogName Application -Source $eventSrcName `
+        Write-EventLog -LogName Application -Source $scriptName `
             -EntryType $level `
             -EventId $id `
             -Message $msg
@@ -68,7 +67,7 @@ function callChildScript ($target, $path, $vmname) {
             -ArgumentList $path, $vmname
     } else {
 #        Write-Host "Failed to confirm remote script existence."
-        writeEvents -level "Error" -msg "childScript.ps1 does not exist on remote server, check path."
+        writeEvents -level "Error" -msg "rebootVm.ps1 does not exist on remote server, check path."
     }
     # TODO: getReturn codes and return to main function
 }
@@ -103,7 +102,7 @@ if ($args.Length -eq 0) {
             } catch {
 #                Write-Host "Failed to call script on secondary server."
                 writeEvents -level "Error" `
-                    -msg "Failed to kick childScript.ps1 both on primary/secondary."
+                    -msg "Failed to kick rebootVm.ps1 both on primary/secondary."
                 exit
 
             }
