@@ -1,5 +1,5 @@
 $childFileName = "childScript.ps1"
-$childDirPath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely"
+$childDirPath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely\childScripts"
 $primaryChildIp = "172.16.110.248"
 $secondaryChildIp = "172.16.110.29"
 $scriptName = $PSCommandPath.Split('\')[-1]

@@ -1,6 +1,6 @@
 # Credentials
 # NOTE: this scripts pre-requires password.secret file generated with Get-Credential cmdlet
-$passwordFilePath = Join-Path (Get-Location).Path "password.secret"
+$passwordFilePath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely\password.secret"
 $vCenter = "vcsa01.nfvlab.local"
 $username = "administrator@vsphere.local"
 $password = Get-Content $passwordFilePath | ConvertTo-SecureString
