@@ -12,11 +12,12 @@ $credential = New-Object -TypeName System.Management.Automation.PsCredential `
 
 
 # Main functions
+$ErrorActionPreference = "stop"
 try {
     Connect-VIServer -Server $vCenter -Credential $credential
 } catch {
     Write-Host "Failed to connect vCenter Server [ $vCenter ]..."
-    Disconnect-VIServer -Server $vCenter
+    Disconnect-VIServer -Server $vCenter -Confirm:$false
     exit 1
 }
 

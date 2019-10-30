@@ -12,11 +12,12 @@ $credential = New-Object -TypeName System.Management.Automation.PsCredential `
 
 
 # Main functions
+$ErrorActionPreference = "stop"
 try {
     Connect-VIServer -Server $vCenter -Credential $credential
 } catch {
     Write-Host "Failed to connect vCenter Server [ $vCenter ]..."
-    Disconnect-VIServer -Server $vCenter
+    Disconnect-VIServer -Server $vCenter -Confirm:$false
     exit 1
 }
 
@@ -25,17 +26,19 @@ try {
     Get-Log -Bundle -Server $vCenter -DestinationPath ./
 } catch {
     Write-Host "Failed to get vc-support [ $vCenter ]..."
+    Disconnect-VIServer -Server $vCenter -Confirm:$false
     exit 1
 }
 
 # Collecting vm-support of each ESXi host
-foreach ($cluster in $targetClsuters) {
+foreach ($cluster in $targetClusters) {
     $esxihosts = Get-Cluster -Name $cluster |Get-VMHost
     foreach ($h in $esxihosts) {
         try {
             Get-Log -Bundle -VMHost $h -DestinationPath ./
         } catch {
             Write-Host "Failed to get vm-support of [ $h ]"
+            Disconnect-VIServer -Server $vCenter -Confirm:$false
             exit 1
         }
     }
