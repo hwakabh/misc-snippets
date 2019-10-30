@@ -13,7 +13,7 @@ $credential = New-Object -TypeName System.Management.Automation.PsCredential `
 
 # Main functions
 try {
-    Connect-VIServer -Server $vCenter -Credentials $creds
+    Connect-VIServer -Server $vCenter -Credential $credential
 } catch {
     Write-Host "Failed to connect vCenter Server [ $vCenter ]..."
     Disconnect-VIServer -Server $vCenter
