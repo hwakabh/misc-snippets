@@ -15,6 +15,7 @@ try {
     Connect-VIServer -Server $vCenter -Credentials $creds
 } catch {
     Write-Host "Failed to connect vCenter Server [ $vCenter ]..."
+    Disconnect-VIServer -Server $vCenter
     exit 1
 }
 
