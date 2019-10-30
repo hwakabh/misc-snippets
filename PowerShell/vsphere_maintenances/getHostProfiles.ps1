@@ -21,12 +21,17 @@ try {
     exit 1
 }
 
+$ErrorActionPreference = "continue"
 foreach ($cluster in $targetClusters) {
     $esxihosts = Get-Cluster -Name $cluster |Get-VMHost
     foreach ($h in $esxihosts) {
         $profileName = "$($h.Name)_$(Get-Date -Format "yyyyMMdd_HHmmss")"
         Write-Host "Creating HostProfile of [ $($h.Name) ] with displayed name [ $profileName ]"
-        New-VMHostProfile -Name $profileName -ReferenceHost $h
+        try {
+            New-VMHostProfile -Name $profileName -ReferenceHost $h
+        } catch {
+            Write-Host "Failed to create HostProfile [ $profileName ] on $($h.Name) ..."
+        }
     }
 }
 

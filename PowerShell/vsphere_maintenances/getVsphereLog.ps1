@@ -31,15 +31,15 @@ try {
 }
 
 # Collecting vm-support of each ESXi host
+$ErrorActionPreference = "continue"
 foreach ($cluster in $targetClusters) {
     $esxihosts = Get-Cluster -Name $cluster |Get-VMHost
     foreach ($h in $esxihosts) {
+        Write-Host "Collecting vm-support of [ $($h.Name) ], it might take some time ..."
         try {
             Get-Log -Bundle -VMHost $h -DestinationPath ./
         } catch {
-            Write-Host "Failed to get vm-support of [ $h ]"
-            Disconnect-VIServer -Server $vCenter -Confirm:$false
-            exit 1
+            Write-Host "Failed to get vm-support of [ $($h.Name) ]"
         }
     }
 }
