@@ -19,6 +19,15 @@ try {
     exit 1
 }
 
+# Collecting vc-support of vCenter
+try {
+    Get-Log -Bundle -Server $vCenter -DestinationPath ./
+} catch {
+    Write-Host "Failed to get vc-support [ $vCenter ]..."
+    exit 1
+}
+
+# Collecting vm-support of each ESXi host
 foreach ($cluster in $targetClsuters) {
     Get-Cluster -Name $cluster |Get-VMHost |Get-Log -Bundle -DestinationPath ./
 }
