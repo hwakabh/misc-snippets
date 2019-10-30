@@ -24,7 +24,8 @@ try {
 foreach ($cluster in $targetClusters) {
     $esxihosts = Get-Cluster -Name $cluster |Get-VMHost
     foreach ($h in $esxihosts) {
-        $profileName = "$h_$(Get-Date -Format "yyyyMMdd_HHmmss")"
+        $profileName = "$($h.Name)_$(Get-Date -Format "yyyyMMdd_HHmmss")"
+        Write-Host "Creating HostProfile of [ $($h.Name) ] whose name is [ $profieName ]"
         New-VMHostProfile -Name $profileName -ReferenceHost $h
     }
 }
