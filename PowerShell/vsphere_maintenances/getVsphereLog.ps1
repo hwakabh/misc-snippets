@@ -29,7 +29,15 @@ try {
 
 # Collecting vm-support of each ESXi host
 foreach ($cluster in $targetClsuters) {
-    Get-Cluster -Name $cluster |Get-VMHost |Get-Log -Bundle -DestinationPath ./
+    $esxihosts = Get-Cluster -Name $cluster |Get-VMHost
+    foreach ($h in $esxihosts) {
+        try {
+            Get-Log -Bundle -VMHost $h -DestinationPath ./
+        } catch {
+            Write-Host "Failed to get vm-support of [ $h ]"
+            exit 1
+        }
+    }
 }
 
 exit 0
