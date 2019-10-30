@@ -21,7 +21,7 @@ try {
     exit 1
 }
 
-foreach ($cluster in $targetClsuters) {
+foreach ($cluster in $targetClusters) {
     # Retrieve Cluster name(s) as command line argument(s),
     # and set ESXi host(s) in the cluster to maintenance mode.
     Get-Cluster -Name $cluster |Get-VMHost |Where-Object {$_.ConnectionState -ne "Maintenance"} |Set-VMHost -State "Maintenace"

@@ -21,8 +21,8 @@ try {
     exit 1
 }
 
-foreach ($cluster in $targetClsuters) {
-    $esxihosts = Get-Cluster -Name $cluster
+foreach ($cluster in $targetClusters) {
+    $esxihosts = Get-Cluster -Name $cluster |Get-VMHost
     foreach ($h in $esxihosts) {
         $profileName = "$h_$(Get-Date -Format "yyyyMMdd_HHmmss")"
         New-VMHostProfile -Name $profileName -ReferenceHost $h
