@@ -5,6 +5,7 @@ $scriptRoot = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\vsphere
 # Credentials
 $vCenter = "vcsa02.nfvlab.local"
 $username = "administrator@vsphere.local"
+$passwordFilePath = Join-Path $scriptRoot "password.dat"
 $password = Get-Content $passwordFilePath | ConvertTo-SecureString
 $credential = New-Object -TypeName System.Management.Automation.PsCredential `
     -ArgumentList $username, $password
