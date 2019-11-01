@@ -21,9 +21,9 @@ try {
     exit 1
 }
 
+$ErrorActionPreference = "continue"
 foreach ($cluster in $targetClusters) {
     $esxihosts = Get-Cluster -Name $cluster |Get-VMhost
-    $ErrorActionPreference = "continue"
     foreach ($h in $esxihosts) {
         if ($esxihosts.ConnectionState -eq "Maintenance") {
             Write-Host "ESXi host [ $($h.Name) ] is not under MaintenanceMode, nothing to do for this host."
