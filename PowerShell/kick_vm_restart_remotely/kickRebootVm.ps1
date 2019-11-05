@@ -78,13 +78,14 @@ if ($args.Length -eq 0) {
     Write-Host "ERROR : Missing arguments ..."
     Write-Host "Please provide a virtual-machine name.`n"
     showHelpMenu
+    exit 255
 
 } elseif ($args.Length -eq 1) {
     writeEvents -level "Information" -msg "Starting to main operation..."
 
     if (($args[0] -eq "--help") -or ($args[0] -eq "-h")) {
         showHelpMenu
-        exit
+        exit 255
     }
 
     if ((testConnection -target $primaryChildIp) -or (testConnection -target $secondaryChildIp)) {
@@ -104,19 +105,19 @@ if ($args.Length -eq 0) {
 #                Write-Host "Failed to call script on secondary server."
                 writeEvents -level "Error" `
                     -msg "Failed to kick rebootVm.ps1 both on primary/secondary."
-                exit
+                exit 1
 
             }
         }
 
         writeEvents -level "Information" `
             -msg "parentScript completed its task successfully, exit the program."
-        exit
+        exit 0
 
     } else {
         writeEvents -level "Error" `
             -msg "testConnection failed both of child servers, check the connectivity."
-        exit
+        exit 128
 
     }
 
@@ -124,4 +125,5 @@ if ($args.Length -eq 0) {
     Write-Host "ERROR : Too many arguments..."
     Write-Host "Restarting multiple virutal-machines at once is not supported, provide just one.`n"
     showHelpMenu
+    exit 255
 }
