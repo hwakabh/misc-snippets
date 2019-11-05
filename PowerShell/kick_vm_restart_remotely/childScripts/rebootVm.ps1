@@ -1,13 +1,15 @@
 # Credentials
 # NOTE: this scripts pre-requires password.secret file generated with Get-Credential cmdlet
-$passwordFilePath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely\password.secret"
+$scriptPath = Convert-Path ..\
+$passwordFilePath = Join-Path -Path $scriptPath -ChildPath "password.secret"
+# Event source name is same as script filename itself
+$eventSrcName = $PSCommandPath.Split('\')[-1]
+
 $vCenter = "vcsa01.nfvlab.local"
 $username = "administrator@vsphere.local"
 $password = Get-Content $passwordFilePath | ConvertTo-SecureString
 $credential = New-Object -TypeName System.Management.Automation.PsCredential `
     -ArgumentList $username, $password
-$eventSrcName = "rebootVm.ps1"
-
 
 # Logging Properties : Create Event source if not exist
 if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Application | `
@@ -71,7 +73,7 @@ if ($args.Length -eq 0) {
 
     if ($(getVmPowerState -vmname $args[0]) -eq $false) {
         Disconnect-VIServer -Server $vCenter -Confirm:$false
-        writeEvents -level "Error" -msg "virutal-machine [ $args[0] ] not found on vCenter [ $vCenter ]"
+        writeEvents -level "Error" -msg "virutal-machine [ $($args[0]) ] not found on vCenter [ $vCenter ]"
         exit
     } else {
         if ((restartVm -vmname $args[0]) -eq $false) {

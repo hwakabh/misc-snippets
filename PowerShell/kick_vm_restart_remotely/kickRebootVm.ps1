@@ -1,8 +1,9 @@
 $primaryChildIp = "172.16.110.248"
 $secondaryChildIp = "172.16.110.29"
 $scriptName = $PSCommandPath.Split('\')[-1]
-$childFileName = "restartVm.ps1"
-$childDirPath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely\childScripts"
+$scriptPath = Convert-Path .
+$childFileName = "rebootVm.ps1"
+$childDirPath = Join-Path -Path $scriptPath -ChildPath "childScripts\"
 
 # Logging Properties : Create Event source if not exist
 if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Application | `
