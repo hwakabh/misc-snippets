@@ -40,13 +40,13 @@ function writeEvents ([String] $level, [String] $msg) {
     }
 }
 
-function getVmPowerState ($vmname) {
+function getVmPowerState ([String] $vmname) {
     writeEvents -level "Information" -msg "Getting power status of virtual-machine [ $vmname ] ..."
     Get-VM -Name $vmname
     return $?
 }
 
-function restartVm ($vmname) {
+function restartVm ([String] $vmname) {
     writeEvents -level "Information" -msg "Restarting virtual-machine [ $vmname ] ..."
     Restart-VM -VM $vmname -Confirm:$false
     return $?

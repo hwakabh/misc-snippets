@@ -44,13 +44,13 @@ function showHelpMenu {
     Write-Host "`t--help | -h : Display help menu (this page)`n"
 }
 
-function testConnection ($target) {
+function testConnection ([String] $target) {
     writeEvents -level "Information" -msg "Testing L4 connectivities with remote server [ $target ]"
     [Boolean] $isAlive = Test-NetConnection -ComputerName $target -Port 5985 -InformationLevel Quiet
     return $isAlive
 }
 
-function callChildScript ($target, $path, $vmname) {
+function callChildScript ([String] $target,[String] $path, [String] $vmname) {
     $isRemoteFileExist = Invoke-Command -ComputerName $target `
         -ScriptBlock { Test-Path $args[0] } `
         -ArgumentList $path
