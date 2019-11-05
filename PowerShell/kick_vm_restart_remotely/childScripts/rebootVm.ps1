@@ -2,7 +2,6 @@
 # NOTE: this scripts pre-requires password.secret file generated with Get-Credential cmdlet
 $scriptPath = Convert-Path ..\
 $passwordFilePath = Join-Path -Path $scriptPath -ChildPath "password.secret"
-# $passwordFilePath = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\kick_vm_restart_remotely\password.secret"
 # Event source name is same as script filename itself
 $eventSrcName = $PSCommandPath.Split('\')[-1]
 

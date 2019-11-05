@@ -4,7 +4,6 @@ $scriptName = $PSCommandPath.Split('\')[-1]
 $scriptPath = Convert-Path .
 $childFileName = "rebootVm.ps1"
 $childDirPath = Join-Path -Path $scriptPath -ChildPath "childScripts\"
-Write-Host $childDirPath
 
 # Logging Properties : Create Event source if not exist
 if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Application | `
