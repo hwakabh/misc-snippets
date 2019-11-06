@@ -1,5 +1,14 @@
-$primaryChildIp = "172.16.110.248"
-$secondaryChildIp = "172.16.110.29"
+$lines = Get-Content .\settings.txt
+foreach ($line in $lines) {
+    if($line -match "^$"){ continue }
+    if($line -match "^\s*;"){ continue }
+
+    $key, $value = $line.split(' = ', 2)
+    Invoke-Expression "`$$key='$value'"
+}
+
+Write-Host $primaryChildIp
+Write-Host $secondaryChildIp
 $scriptName = $PSCommandPath.Split('\')[-1]
 $scriptPath = Convert-Path .
 $childFileName = "rebootVm.ps1"
