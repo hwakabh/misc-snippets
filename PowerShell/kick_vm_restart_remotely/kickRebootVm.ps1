@@ -7,12 +7,15 @@ foreach ($line in $lines) {
     Invoke-Expression "`$$key='$value'"
 }
 
-Write-Host $primaryChildIp
-Write-Host $secondaryChildIp
 $scriptName = $PSCommandPath.Split('\')[-1]
 $scriptPath = Convert-Path .
 $childFileName = "rebootVm.ps1"
 $childDirPath = Join-Path -Path $scriptPath -ChildPath "childScripts\"
+
+Write-Host ">>> Script [ $scriptName ] started, reading parameters."
+Write-Host ">>> Set Primary remote server [ $primaryChildIp ]"
+Write-Host ">>> Set Secondary remote server [ $secondaryChildIp ]"
+Write-Host ">>> Determined path of child script [ $childFileName ]`n $childDirPath"
 
 # Logging Properties : Create Event source if not exist
 if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Application | `
