@@ -12,25 +12,26 @@ $credential = New-Object -TypeName System.Management.Automation.PsCredential `
 
 $outFileName = "result.csv"
 
+$ErrorActionPreference = "stop"
 try {
     Connect-VIServer -Server $vCenter -Credential $credential |Out-Null
-    Write-Output "Successfully connected vCenter Server [ $vCenter ]"
+    Write-Output ">>> Successfully connected vCenter Server [ $vCenter ]"
 } catch {
-    Write-Output "Failed to connect vCenter Server [ $vCenter ]. Exit the program."
+    Write-Output ">>> Failed to connect vCenter Server [ $vCenter ]. Exit the program."
     exit 128
 }
 
 # Collecting relations and export them to csv.
-Write-Output "Dumping relations with virtual-machines..."
+Write-Output ">>> Dumping relations with virtual-machines..."
 &{foreach($dc in Get-Datacenter){
     foreach($cluster in Get-Cluster -Location $dc){
-        foreach($esx in Get-VMHost -Location $cluster){
-            Get-VM -Location $esx |
+        foreach($esxi in Get-VMHost -Location $cluster){
+            Get-VM -Location $esxi |
             Select @{N='Datacenter';E={$dc.Name}},
                 @{N='Cluster';E={$cluster.Name}},
-                @{N='VMhost';E={$esx.Name}},Name
+                @{N='VMhost';E={$esxi.Name}},Name
         }
     }
 }} | Export-Csv $outFileName -NoTypeInformation -UseCulture
-Write-Output "Successfully exported to csv file [ $outFileName ]."
+Write-Output ">>> Successfully exported to csv file [ $outFileName ].`n"
 exit 0
