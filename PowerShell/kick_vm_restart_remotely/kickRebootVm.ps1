@@ -3,7 +3,7 @@ foreach ($line in $lines) {
     if($line -match "^$"){ continue }
     if($line -match "^\s*;"){ continue }
 
-    $key, $value = $line.split(' = ', 2)
+    $key, $value = $line -split ' = ',2 -replace "`"",''
     Invoke-Expression "`$$key='$value'"
 }
 
@@ -15,7 +15,7 @@ $childDirPath = Join-Path -Path $scriptPath -ChildPath "childScripts\"
 Write-Host ">>> Script [ $scriptName ] started, reading parameters."
 Write-Host ">>> Set Primary remote server [ $primaryChildIp ]"
 Write-Host ">>> Set Secondary remote server [ $secondaryChildIp ]"
-Write-Host ">>> Determined path of child script [ $childFileName ]`n $childDirPath"
+Write-Host ">>> Determined path of child script [ $childFileName ]`n $childDirPath `n`n"
 
 # Logging Properties : Create Event source if not exist
 if ((Get-ChildItem -Path HKLM:SYSTEM\CurrentControlSet\Services\EventLog\Application | `
