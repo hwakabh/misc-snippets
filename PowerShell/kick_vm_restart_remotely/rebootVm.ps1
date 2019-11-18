@@ -1,7 +1,9 @@
 # Credentials
 # NOTE: this scripts pre-requires password.secret file generated with Get-Credential cmdlet
-$scriptPath = Convert-Path ..\
-$passwordFilePath = Join-Path -Path $scriptPath -ChildPath "vcenter.secret"
+$projectRootPath = Split-Path $MyInvocation.MyCommand.Path -Parent
+Write-Host ">>> Project Root Path : $projectRootPath"
+$passwordFilePath = Join-Path -Path $projectRootPath -ChildPath "vcenter.secret"
+Write-Host ">>> Password file path : $passwordFilePath "
 # Event source name is same as script filename itself
 $eventSrcName = $PSCommandPath.Split('\')[-1]
 
