@@ -76,7 +76,7 @@ function callChildScript ([String] $target,[String] $path, [String] $vmname) {
             $stdout = Invoke-Command -ComputerName $target `
                 -ScriptBlock { powershell.exe $args[0] $args[1]} `
                 -ArgumentList $path, $vmname `
-                -ErrorAction Continue
+                -ErrorAction Stop
             foreach ($line in $stdout){
                 Write-Host $line
             }
@@ -128,11 +128,18 @@ if ($args.Length -eq 0) {
             # Retry if failed
             Write-Host ">>> Retrying the operations on secondary server ..."
             writeEvents -level "Warning" -msg "Failed to callChildScript() on primary server, fail-over to secondary one ..."
-            $ret_2 = callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
-            if ($ret_2 -ne 0) {
-                Write-Host ">>> Failed to callChildScript() on secondary server.`n"
-                writeEvents -level "Error" -msg "Failed to kick rebootVm.ps1 both on primary/secondary."
-                Write-Host "`n[ RESULT ]The program failed to call remote scripts both of remove server. Exit the program."
+            if (testConnection -target $secondaryChildIp) {
+                $ret_2 = callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
+                if ($ret_2 -ne 0) {
+                    Write-Host ">>> Failed to callChildScript() on secondary server.`n"
+                    writeEvents -level "Error" -msg "Failed to kick rebootVm.ps1 both on primary/secondary."
+                    Write-Host "`n[ RESULT ]The program failed to call remote scripts both of remote server. Exit the program."
+                    exit 1
+                }
+            } else {
+                Write-Host "Secondary remote server unreachable. No restarting opertaions was executed."
+                writeEvents -level "Error" -msg "Secondary remote server unreachable. No restarting opertaions was executed."
+                Write-Host "`n[ RESULT ]Failed to call scripts on primary server, and secondary server would be unreachable."
                 exit 1
             }
         }
