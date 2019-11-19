@@ -1,8 +1,6 @@
-# NOTE: this scripts pre-requires password.secret file generated with Get-Credential cmdlet
-$scriptPath = Convert-Path ..\
-$passwordFilePath = Join-Path -Path $scriptPath -ChildPath "password.secret"
-# Event source name is same as script filename itself
-$eventSrcName = $PSCommandPath.Split('\')[-1]
+# NOTE: this scripts pre-requires vcenter.secret file generated with Get-Credential cmdlet
+$scriptPath = Split-Path $MyInvocation.MyCommand.Path -Parent
+$passwordFilePath = Join-Path -Path $scriptPath -ChildPath "vcenter.secret"
 
 $vCenter = "vcsa01.nfvlab.local"
 $username = "administrator@vsphere.local"
