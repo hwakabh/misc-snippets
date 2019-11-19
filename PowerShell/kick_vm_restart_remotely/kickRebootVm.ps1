@@ -112,11 +112,11 @@ if ($args.Length -eq 0) {
 
     Write-Host ">>> Strating to main operation ..."
     writeEvents -level "Information" -msg "Starting to main operation..."
+    $filePath = Join-Path $childDirPath $childFileName
+    $ErrorActionPreference = "stop"
 
     Write-Host ">>> Checking connectivities with testConnection() ..."
-    if ((testConnection -target $primaryChildIp) -or (testConnection -target $secondaryChildIp)) {
-        $filePath = Join-Path $childDirPath $childFileName
-        $ErrorActionPreference = "stop"
+    if (testConnection -target $primaryChildIp) {
 
         # Try initial call
         Write-Host ">>> Start operation on primary server ..."
@@ -138,6 +138,21 @@ if ($args.Length -eq 0) {
         }
 
         Write-Host "[ RESULT ]parentScript completed its task successfully, exit the program."
+        writeEvents -level "Information" -msg "parentScript completed its task successfully, exit the program."
+        exit 0
+
+    } elseif (testConnection -target $secondaryChildIp) {
+        Write-Host ">>> Primary Server Unreachable. `n"
+        Write-Host ">>> Switch to start operation on Secondary Server ..."
+        writeEvents -level "Warning" -msg "Failed to callChildScript() on primary server, start operation on secondary one ..."
+        $ret_3 = callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
+
+        if ($ret_3 -ne 0) {
+            Write-Host ">>> Failed to call script on primary server.`n`n"
+            Write-Host "[ RESULT ]Primary Server Unreachable, and failed operation on secondary server."
+            exit 1
+        }
+        Write-Host "[ RESULT ]parentScript completed its task successfully on secondary server, exit the program."
         writeEvents -level "Information" -msg "parentScript completed its task successfully, exit the program."
         exit 0
 
