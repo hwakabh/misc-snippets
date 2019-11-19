@@ -111,7 +111,7 @@ if ($args.Length -eq 0) {
     Write-Host ">>> Determined path of child script [ $childFileName ] with [ $childDirPath ]`n"
 
     Write-Host ">>> Strating to main operation ..."
-    writeEvents -level "Information" -msg "Starting to main operation..."
+    writeEvents -level "Warning" -msg "Starting to main operation..."
     $filePath = Join-Path $childDirPath $childFileName
     $ErrorActionPreference = "stop"
 
@@ -127,18 +127,18 @@ if ($args.Length -eq 0) {
 
             # Retry if failed
             Write-Host ">>> Retrying the operations on secondary server ..."
-            writeEvents -level "Warning" -msg "Failed to callChildScript() on primary server, continue on secondary one ..."
+            writeEvents -level "Warning" -msg "Failed to callChildScript() on primary server, fail-over to secondary one ..."
             $ret_2 = callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
             if ($ret_2 -ne 0) {
                 Write-Host ">>> Failed to callChildScript() on secondary server.`n"
                 writeEvents -level "Error" -msg "Failed to kick rebootVm.ps1 both on primary/secondary."
-                Write-Host "[ RESULT ]The program failed to call remote scripts both of remove server. Exit the program."
+                Write-Host "`n[ RESULT ]The program failed to call remote scripts both of remove server. Exit the program."
                 exit 1
             }
         }
 
-        Write-Host "[ RESULT ]parentScript completed its task successfully, exit the program."
-        writeEvents -level "Information" -msg "parentScript completed its task successfully, exit the program."
+        Write-Host "`n[ RESULT ]parentScript completed its task successfully, exit the program."
+        writeEvents -level "Warning" -msg "parentScript completed its task successfully, exit the program."
         exit 0
 
     } elseif (testConnection -target $secondaryChildIp) {
@@ -148,16 +148,17 @@ if ($args.Length -eq 0) {
         $ret_3 = callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
 
         if ($ret_3 -ne 0) {
-            Write-Host ">>> Failed to call script on primary server.`n`n"
-            Write-Host "[ RESULT ]Primary Server Unreachable, and failed operation on secondary server."
+            Write-Host ">>> Failed to call script on secondary server.`n`n"
+            writeEvents -level "Error" -msg "Failed to kick rebootVm.ps1 on secondary server... Exit the program."
+            Write-Host "`n[ RESULT ]Primary Server Unreachable, and failed operation on secondary server."
             exit 1
         }
-        Write-Host "[ RESULT ]parentScript completed its task successfully on secondary server, exit the program."
-        writeEvents -level "Information" -msg "parentScript completed its task successfully, exit the program."
+        Write-Host "`n[ RESULT ]parentScript completed its task successfully on secondary server, exit the program."
+        writeEvents -level "Warning" -msg "parentScript completed its task successfully, exit the program."
         exit 0
 
     } else {
-        writeEvents -level "Error" -msg "[ RESULT ]testConnection() failed both of child servers, check the connectivity."
+        writeEvents -level "Error" -msg "`n[ RESULT ]testConnection() failed both of child servers, check the connectivity."
         exit 128
 
     }
