@@ -77,7 +77,7 @@ if ($args.Length -eq 0) {
     [String]$targetHost = (Import-Csv -Path $csvFilePath |Where-Object {$_.Name -eq "$targetVmName"} |Select-Object -Property VMhost).VMHost
 
     if ($targetHost -eq "") {
-        Write-Host "Target virtual machine [ $targetVmName } not found on any of ESXi Host..."
+        Write-Host "Target virtual machine [ $targetVmName ] not found on any of ESXi Host..."
         exit 1
     } else {
         Write-Host "Found [ $targetVmName ] on the ESXi Host [ $targetHost ]"
@@ -87,20 +87,19 @@ if ($args.Length -eq 0) {
             Connect-VIServer -Server $targetHost -Credential $credential |Out-Null
             writeEvents -level "Information" -msg "Successfully connected ESXi Host [ $targetHost ]"
         } catch {
-    #        Disconnect-VIServer -Server $vCenter -Confirm:$false
             Write-Host "Failed to connect ESXi Host ..."
             writeEvents -level "Error" -msg "Failed to connect ESXi Host [ $targetHost ]. Exit the program."
             exit 128
         }
 
-        if ($(restartVm -vmname $args[0]) -eq $false) {
-            Write-Host "Tried to restart VM [ $($args[0]) ] , but failed."
+        if ($(restartVm -vmname $targetVmName) -eq $false) {
+            Write-Host "Tried to restart VM [ $targetVmName ] , but failed."
             writeEvents -level "Error" -msg "Tried to restart VM, but failed unexpectedly."
-            Disconnect-VIServer -Server $vCenter -Confirm:$false
+            Disconnect-VIServer -Server $targetHost -Confirm:$false
             exit 1
         } else {
-            Write-Host "Successfully restart VM [ $($args[0]) ], current VM power state below."
-            $powerStatus = getVmPowerState -vmname $args[0]
+            Write-Host "Successfully restart VM [ $targetVmName ], current VM power state below."
+            $powerStatus = getVmPowerState -vmname $targetVmName
             Write-Host "PowerState of restarted virtual-machine [ $powerStatus ]"
             Write-Host "The child script worked completely. Exit the program."
             writeEvents -level "Information" -msg "The script worked completely. Exit the program."
