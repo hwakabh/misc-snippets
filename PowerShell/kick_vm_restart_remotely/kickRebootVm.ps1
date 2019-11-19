@@ -11,6 +11,7 @@ foreach ($line in $lines) {
 $scriptName = $PSCommandPath.Split('\')[-1]
 $scriptPath = Convert-Path .
 $childFileName = "rebootVm.ps1"
+$cpChildFileName = "cp_rebootVm.ps1"
 $childDirPath = $scriptPath
 
 
@@ -87,7 +88,7 @@ function callChildScript ([String] $target,[String] $path, [String] $vmname) {
         return 0
 
     } else {
-        writeEvents -level "Error" -msg "rebootVm.ps1 does not exist on remote server, check path."
+        writeEvents -level "Warning" -msg "rebootVm.ps1 does not exist on remote server, check path."
         return 1
     }
 }
@@ -113,6 +114,7 @@ if ($args.Length -eq 0) {
     Write-Host ">>> Strating to main operation ..."
     writeEvents -level "Warning" -msg "Starting to main operation..."
     $filePath = Join-Path $childDirPath $childFileName
+    $cpFilePath = Join-Path $childDirPath $cpChildFileName
     $ErrorActionPreference = "stop"
 
     Write-Host ">>> Checking connectivities with testConnection() ..."
@@ -125,22 +127,34 @@ if ($args.Length -eq 0) {
         if ($ret_1 -ne 0) {
             Write-Host ">>> Failed to call script on primary server.`n`n"
 
-            # Retry if failed
-            Write-Host ">>> Retrying the operations on secondary server ..."
-            writeEvents -level "Warning" -msg "Failed to callChildScript() on primary server, fail-over to secondary one ..."
-            if (testConnection -target $secondaryChildIp) {
-                $ret_2 = callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
-                if ($ret_2 -ne 0) {
-                    Write-Host ">>> Failed to callChildScript() on secondary server.`n"
-                    writeEvents -level "Error" -msg "Failed to kick rebootVm.ps1 both on primary/secondary."
-                    Write-Host "`n[ RESULT ]The program failed to call remote scripts both of remote server. Exit the program."
+            Write-Host ">>> Continue to try with CP-scripts on primary server ..."
+            $cpRet_1 = callChildScript -target $primaryChildIp -path $cpFilePath -vmname $args[0]
+            if ($cpRet_1 -ne 0) {
+                Write-Host "Even CP Script, failed to operate. Exit the program..."
+                # Retry if failed
+                Write-Host ">>> Retrying the operations on secondary server ..."
+                writeEvents -level "Warning" -msg "Failed to callChildScript() on primary server, fail-over to secondary one ..."
+                if (testConnection -target $secondaryChildIp) {
+                    $ret_2 = callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
+                    if ($ret_2 -ne 0) {
+                        Write-Host ">>> Failed to callChildScript() on secondary server.`n"
+
+                        $cpRet_2 = callChildScript -target $secondaryChildIp -path $cpFilePath -vmname $args[0]
+                        if ($cpRet_2 -ne 0) {
+                            writeEvents -level "Error" -msg "Failed to kick rebootVm.ps1 both on primary/secondary."
+                            Write-Host "`n[ RESULT ]The program failed to call remote scripts both of remote server. Exit the program."
+                            exit 1
+                        } else {
+                            Write-Host "`n[ RESULT ]Target VM restarted with CP-Script on secondary remote server..."
+                            exit 0
+                        }
+                    }
+                } else {
+                    Write-Host "Secondary remote server unreachable. No restarting opertaions was executed."
+                    writeEvents -level "Error" -msg "Secondary remote server unreachable. No restarting opertaions was executed."
+                    Write-Host "`n[ RESULT ]Failed to call scripts on primary server, and secondary server would be unreachable."
                     exit 1
                 }
-            } else {
-                Write-Host "Secondary remote server unreachable. No restarting opertaions was executed."
-                writeEvents -level "Error" -msg "Secondary remote server unreachable. No restarting opertaions was executed."
-                Write-Host "`n[ RESULT ]Failed to call scripts on primary server, and secondary server would be unreachable."
-                exit 1
             }
         }
 
@@ -151,14 +165,23 @@ if ($args.Length -eq 0) {
     } elseif (testConnection -target $secondaryChildIp) {
         Write-Host ">>> Primary Server Unreachable. `n"
         Write-Host ">>> Switch to start operation on Secondary Server ..."
-        writeEvents -level "Warning" -msg "Failed to callChildScript() on primary server, start operation on secondary one ..."
+        writeEvents -level "Warning" -msg "Primary Server unreachable, start operation on secondary one ..."
         $ret_3 = callChildScript -target $secondaryChildIp -path $filePath -vmname $args[0]
 
         if ($ret_3 -ne 0) {
             Write-Host ">>> Failed to call script on secondary server.`n`n"
-            writeEvents -level "Error" -msg "Failed to kick rebootVm.ps1 on secondary server... Exit the program."
-            Write-Host "`n[ RESULT ]Primary Server Unreachable, and failed operation on secondary server."
-            exit 1
+
+            Write-Host ">>> Continue to try with CP-scripts on primary server ..."
+            $cpRet_3 = callChildScript -target $secondaryChildIp -path $cpFilePath -vmname $args[0]
+            if ($cpRet_3 -ne 0) {
+                Write-Host "Even CP Script, failed to operate. Exit the program."
+                writeEvents -level "Error" -msg "Failed to kick rebootVm.ps1/cp_rebootVm.ps1 on secondary server... Exit the program."
+                Write-Host "`n[ RESULT ]Primary Server Unreachable, and failed operation on secondary server with rebootVm.ps1/cp_rebootVm.ps1."
+                exit 1
+            } else {
+                Write-Host "`n[ RESULT ]Primary server unrechable, but target VM rebooted with CP script on secondary server."
+                exit 0
+            }
         }
         Write-Host "`n[ RESULT ]parentScript completed its task successfully on secondary server, exit the program."
         writeEvents -level "Warning" -msg "parentScript completed its task successfully, exit the program."
