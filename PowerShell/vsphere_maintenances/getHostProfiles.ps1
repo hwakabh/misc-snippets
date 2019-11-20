@@ -1,13 +1,13 @@
 # Preset command-line arguments
 Param(
-    [parameter(mandatory=$true)][String[]]$targetClusters,       # Names of target clusters to gather hostProfiles
-    [parameter(mandatory=$true)][String]$downloadPath   # Local Path of downloading hostprofiles
+    [parameter(mandatory=$true)][String[]]$targetClusters,  # Names of target clusters to gather hostProfiles
+    [parameter(mandatory=$true)][String]$downloadPath       # Local Path of downloading hostprofiles
 )
 
-# Pre-Requirements
+# Set input path
 $scriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
-# Credentials
+# Set each parameters by configuration/password files
 $vCenter = "vcsa02.nfvlab.local"
 $username = "administrator@vsphere.local"
 $passwordFilePath = Join-Path $scriptRoot "password.dat"
@@ -15,8 +15,7 @@ $password = Get-Content $passwordFilePath | ConvertTo-SecureString
 $credential = New-Object -TypeName System.Management.Automation.PsCredential `
     -ArgumentList $username, $password
 
-
-# Main functions
+# Establish connection to vCenter Server
 $ErrorActionPreference = "stop"
 try {
     Connect-VIServer -Server $vCenter -Credential $credential
@@ -26,6 +25,9 @@ try {
     exit 1
 }
 
+# Delete current hostprofiles whose name is same as input arugments
+
+# Gather & Download hostProfiles with every hosts in target cluster(s)
 $ErrorActionPreference = "continue"
 foreach ($cluster in $targetClusters) {
     $esxihosts = Get-Cluster -Name $cluster |Get-VMHost

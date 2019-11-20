@@ -1,6 +1,11 @@
-# Pre-Requirements
-$targetClusters = $args
-$scriptRoot = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\vsphere_maintenances"
+# Preset command-line arguments
+Param(
+    [parameter(mandatory=$true)][String]$targetHost,        # Name of target ESXi host to apply hostProfile
+    [parameter(mandatory=$true)][String]$inputFilePath      # Local Path of hostprofile to apply
+)
+
+# Set input path
+$scriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
 # Credentials
 $vCenter = "vcsa02.nfvlab.local"

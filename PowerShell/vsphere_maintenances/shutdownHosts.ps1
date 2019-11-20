@@ -1,6 +1,10 @@
-# Pre-Requirements
-$targetClusters = $args
-$scriptRoot = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\vsphere_maintenances"
+# Preset command-line arguments
+Param(
+    [parameter(mandatory=$true)][String[]]$targetClusters,  # Names of target clusters to shutdown
+)
+
+# Set input path
+$scriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
 # Credentials
 $vCenter = "vcsa02.nfvlab.local"
