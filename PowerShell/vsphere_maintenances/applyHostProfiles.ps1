@@ -4,6 +4,12 @@ Param(
     [parameter(mandatory=$true)][String]$inputFilePath      # Local Path of hostprofile to apply
 )
 
+# Testing local Profile path
+if ((Test-Path -Path $inputFilePath) -eq $false) {
+    Write-Host "Provided local hostProfile does not exist, please check the path."
+    exit 128
+}
+
 $configFilename = ".\credentials.txt"
 Write-Host ">>> Script started, read configuration from [ $configFilename ]..."
 Write-Host ""
@@ -34,8 +40,6 @@ Write-Host "PasswordFilePath :`t`t $passwordFilePath"
 Write-Host "Profile Local FullPath :`t $profilePath"
 Write-Host "ProfileName :`t`t`t $profileName"
 Write-Host ""
-
-
 
 # Read password from file and make credentials
 $password = Get-Content $passwordFilePath | ConvertTo-SecureString
