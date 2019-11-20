@@ -24,9 +24,10 @@ foreach ($line in $lines) {
     Invoke-Expression "`$$key='$value'"
 }
 Write-Host ">>> Reading parameters :"
-Write-Host "vCenter :`t $vCenter"
-Write-Host "username :`t $username"
-Write-Host "Password File :`t $passwordFilename"
+Write-Host "vCenter :`t`t`t $vCenter"
+Write-Host "username :`t`t`t $username"
+Write-Host "Password File :`t`t`t $passwordFilename"
+Write-Host "Operation Interval(Sec) :`t $waitIntervalSec"
 Write-Host ""
 
 # Set input path
