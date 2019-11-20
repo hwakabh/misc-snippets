@@ -1,6 +1,6 @@
 # Preset command-line arguments
 Param(
-    [parameter(mandatory=$true)][String[]]$targetClusters,  # Names of target clusters to set maintenaceMode
+    [parameter(mandatory=$true)][String[]]$targetClusters  # Names of target clusters to set maintenaceMode
 )
 
 # Set input path
