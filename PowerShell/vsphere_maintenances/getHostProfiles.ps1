@@ -81,11 +81,12 @@ foreach ($cluster in $targetClusters) {
 
         # Download hostProfile with host to local
         Write-Host ">>> Exporting HostProfile of ESXi Host to local ..."
+        $exportFilePath = Join-Path -Path $downloadPath -ChildPath "$profileName.vpf"
         try {
             # If already downloaded profiles with same name, overwrite the files with -Force option
-            Get-VMHostProfile -ReferenceHost $h -Name $profileName |Export-VMHostProfile -FilePath $downloadPath -Force:$true
+            Get-VMHostProfile -ReferenceHost $h -Name $profileName |Export-VMHostProfile -FilePath $exportFilePath -Force:$true
         } catch {
-            Write-Host "Failed to download HostProfile [ $profileName ] to local-path [ $downloadPath ] ..."
+            Write-Host "Failed to download HostProfile [ $profileName ] to local-path [ $exportFilePath ] ..."
         }
         Write-Host ""
 
