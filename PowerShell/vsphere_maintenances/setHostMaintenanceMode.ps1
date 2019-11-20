@@ -17,6 +17,7 @@ Write-Host ""
 $lines = Get-Content $configFile
 foreach ($line in $lines) {
     if($line -match "^$"){ continue }
+    if($line -match "^#"){ continue }
     if($line -match "^\s*;"){ continue }
 
     $key, $value = $line -split ' = ',2 -replace "`"",''
