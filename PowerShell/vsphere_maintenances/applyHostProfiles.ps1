@@ -31,9 +31,10 @@ Write-Host ""
 # Set input path
 $scriptRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 $passwordFilePath = Join-Path -Path $scriptRoot -ChildPath $passwordFilename
-# TODO: on OSX env, delimiter should be `/` while Windows is `\`
 $profilePath = Convert-Path -Path $inputFilePath
-$profileName = (Convert-Path -Path $inputFilePath).Split('/')[-1].Replace('.vpf', '')
+$profileName = (Convert-Path -Path $inputFilePath).Split('\')[-1].Replace('.vpf', '')
+# DEBUG: on OSX env, delimiter should be `/` while Windows is `\`
+# $profileName = (Convert-Path -Path $inputFilePath).Split('/')[-1].Replace('.vpf', '')
 Write-Host ">>> Determine path parameters"
 Write-Host "RootPath :`t`t`t $scriptRoot"
 Write-Host "PasswordFilePath :`t`t $passwordFilePath"
