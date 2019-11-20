@@ -1,13 +1,20 @@
 # Preset command-line arguments
 Param(
-    [parameter(mandatory=$true)][String[]]$targetClusters  # Names of target clusters to set maintenaceMode
+    [parameter(mandatory=$true)][String]$configFilePath,     # Path of configruration file
+    [parameter(mandatory=$true)][String[]]$targetClusters   # Names of target clusters to set maintenaceMode
 )
 
-$configFilename = ".\credentials.txt"
-Write-Host ">>> Script started, read configuration from [ $configFilename ]..."
+# Testing configuration file path
+if ((Test-Path -Path $configFilePath) -eq $false) {
+    Write-Host "Provided configuration file does not exist, please check the path."
+    exit 128
+}
+$configFile = Convert-Path -Path $configFilePath
+Write-Host ">>> Script started, read configuration ..."
+Write-Host "Conf File Path :`t $configFile"
 Write-Host ""
 
-$lines = Get-Content $configFilename
+$lines = Get-Content $configFile
 foreach ($line in $lines) {
     if($line -match "^$"){ continue }
     if($line -match "^\s*;"){ continue }

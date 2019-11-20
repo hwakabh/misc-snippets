@@ -1,20 +1,27 @@
 # Preset command-line arguments
 Param(
-    [parameter(mandatory=$true)][String[]]$targetHosts,        # Name of target ESXi host(s) to apply hostProfile
-    [parameter(mandatory=$true)][String]$inputFilePath      # Local Path of hostprofile to apply
+    [parameter(mandatory=$true)][String]$configFilePath,     # Path of configruration file
+    [parameter(mandatory=$true)][String[]]$targetHosts,     # Name of target ESXi host(s) to apply hostProfile
+    [parameter(mandatory=$true)][String]$localProfilePath      # Local Path of hostprofile to apply
 )
 
+# Testing configuration file path
+if ((Test-Path -Path $configFilePath) -eq $false) {
+    Write-Host "Provided configuration file does not exist, please check the path."
+    exit 128
+}
 # Testing local Profile path
-if ((Test-Path -Path $inputFilePath) -eq $false) {
+if ((Test-Path -Path $localProfilePath) -eq $false) {
     Write-Host "Provided local hostProfile does not exist, please check the path."
     exit 128
 }
 
-$configFilename = ".\credentials.txt"
-Write-Host ">>> Script started, read configuration from [ $configFilename ]..."
+$configFile = Convert-Path -Path $configFilePath
+Write-Host ">>> Script started, read configuration ..."
+Write-Host "Conf File Path :`t $configFile"
 Write-Host ""
 
-$lines = Get-Content $configFilename
+$lines = Get-Content $configFile
 foreach ($line in $lines) {
     if($line -match "^$"){ continue }
     if($line -match "^\s*;"){ continue }
@@ -31,10 +38,10 @@ Write-Host ""
 # Set input path
 $scriptRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 $passwordFilePath = Join-Path -Path $scriptRoot -ChildPath $passwordFilename
-$profilePath = Convert-Path -Path $inputFilePath
-$profileName = (Convert-Path -Path $inputFilePath).Split('\')[-1].Replace('.vpf', '')
+$profilePath = Convert-Path -Path $localProfilePath
+$profileName = (Convert-Path -Path $localProfilePath).Split('\')[-1].Replace('.vpf', '')
 # DEBUG: on OSX env, delimiter should be `/` while Windows is `\`
-# $profileName = (Convert-Path -Path $inputFilePath).Split('/')[-1].Replace('.vpf', '')
+# $profileName = (Convert-Path -Path $localProfilePath).Split('/')[-1].Replace('.vpf', '')
 Write-Host ">>> Determine path parameters"
 Write-Host "RootPath :`t`t`t $scriptRoot"
 Write-Host "PasswordFilePath :`t`t $passwordFilePath"
