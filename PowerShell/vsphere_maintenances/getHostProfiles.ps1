@@ -1,6 +1,11 @@
+# Preset command-line arguments
+Param(
+    [parameter(mandatory=$true)][String[]]$targetClusters,       # Names of target clusters to gather hostProfiles
+    [parameter(mandatory=$true)][String]$downloadPath   # Local Path of downloading hostprofiles
+)
+
 # Pre-Requirements
-$targetClusters = $args
-$scriptRoot = "C:\Users\Administrator\Documents\misc-snippets\PowerShell\vsphere_maintenances"
+$scriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
 # Credentials
 $vCenter = "vcsa02.nfvlab.local"
