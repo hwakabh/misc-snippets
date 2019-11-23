@@ -32,7 +32,6 @@ Write-Host ""
 # Set input path
 $scriptRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 $passwordFilePath = Join-Path -Path $scriptRoot -ChildPath $passwordFilename
-$downloadPath = $scriptRoot
 Write-Host ">>> Determine path parameters"
 Write-Host "RootPath :`t`t $scriptRoot"
 Write-Host "Download Path :`t`t $downloadPath"
