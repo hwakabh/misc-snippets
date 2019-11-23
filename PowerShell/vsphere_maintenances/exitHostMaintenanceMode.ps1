@@ -64,11 +64,17 @@ foreach ($cluster in $targetClusters) {
     # Retrieve Cluster name(s) as command line argument(s),
     # and unset ESXi host(s) in the cluster to maintenance mode.
     Write-Host ">>> Exit all of ESXi Hosts in cluster [ $cluster ] from maintenanceMode ..."
-    try {
-        # If ESXi host(s) have already in normal state, command-let would be executed but nothing would be happen
-        Get-Cluster -Name $cluster |Get-VMHost |Where-Object {$_.ConnectionState -eq "Maintenance"} |Set-VMHost -State "Connected"
-    } catch {
-        Write-Host "Failed to recovery ESXi Host(s) from maintenanceMode ...`n"
+    $esxis = Get-Cluster -Name $cluster |Get-VMHost |Where-Object {$_.ConnectionState -eq "Maintenance"} 
+    foreach ($esxi in $esxis) {
+        Write-Host ">>> Unset ESXi Host [ $($esxi.Name) ] from maintenanceMode, this might take some time ..."
+        try {
+            # If ESXi host(s) have already in normal state, command-let would be executed but nothing would be happen
+            Get-VMHost -Name $esxi.Name |Set-VMHost -State "Connected"
+        } catch {
+            Write-Host "Failed to recovery ESXi Host(s) from maintenanceMode ..."
+        }
+        Write-Host ""
+        Start-Sleep -Seconds $waitIntervalSec
     }
 }
 
