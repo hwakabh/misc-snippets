@@ -63,11 +63,17 @@ foreach ($cluster in $targetClusters) {
     # Retrieve Cluster name(s) as command line argument(s),
     # and set ESXi host(s) in the cluster to maintenance mode.
     Write-Host ">>> Enter all of ESXi Hosts in cluster [ $cluster ] to maintenanceMode ..."
-    try {
-        # If ESXi host(s) have already in maintenanceMode, command-let would be executed but nothing would be happen
-        Get-Cluster -Name $cluster |Get-VMHost |Where-Object {$_.ConnectionState -ne "Maintenance"} |Set-VMHost -State "Maintenance"
-    } catch {
-        Write-Host "Failed to set ESXi Host(s) to maintenanceMode ...`n"
+    $esxis = Get-Cluster -Name $cluster |Get-VMHost |Where-Object {$_.ConnectionState -ne "Maintenance"}
+    foreach ($esxi in $esxis) {
+        Write-Host ">>> Set ESXi Host [ $($esxi.Name) ] to maintenanceMode, this might take some time ..."
+        try {
+            # If ESXi host(s) have already in maintenanceMode, command-let would be executed but nothing would be happen
+            Get-VMHost -Name $esxi.Name |Set-VMHost -State "Maintenance"
+        } catch {
+            Write-Host "Failed to set ESXi Host(s) to maintenanceMode ...`n"
+        }
+        Write-Host ""
+        Start-Sleep -Seconds $waitIntervalSec
     }
 }
 
