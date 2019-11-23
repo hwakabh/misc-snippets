@@ -61,19 +61,24 @@ Write-Host ""
 
 $ErrorActionPreference = "continue"
 foreach ($cluster in $targetClusters) {
-    $esxihosts = Get-Cluster -Name $cluster |Get-VMhost
-    foreach ($h in $esxihosts) {
-        if ($esxihosts.ConnectionState -eq "Maintenance") {
-            Write-Host "ESXi host [ $($h.Name) ] is not under MaintenanceMode, nothing to do for this host."
+    $esxis = Get-Cluster -Name $cluster |Get-VMhost
+    Write-Host ">>> Shutdown all of ESXi Hosts in cluster [ $cluster ] ..."
+    foreach ($esxi in $esxis) {
+        if ($esxi.ConnectionState -ne "Maintenance") {
+            Write-Host "ESXi host [ $($esxi.Name) ] is not under MaintenanceMode, nothing to do for this host."
         } else {
-            Write-Host "Shutting down ESXi host [ $($h.Name) ], this operation might take some minutes..."
+            Write-Host ">>> Shutting down ESXi host [ $($esxi.Name) ], this operation might take some minutes..."
             try {
-                Stop-VMhost -VMhost $h -Confirm:$false
+                Stop-VMhost -VMhost $esxi -Confirm:$false
             } catch {
-                Write-Host "Failed to shutdown ESXi host [ $($h.Name) ]..."
+                Write-Host "Failed to shutdown ESXi host [ $($esxi.Name) ]..."
             }
+            Write-Host ""
+            Start-Sleep -Seconds $waitIntervalSec
         }
     }
 }
 
+Write-Host ">>> Script done, disconnecting the server ..."
+Disconnect-VIServer -Server $vCenter -Confirm:$false
 exit 0
