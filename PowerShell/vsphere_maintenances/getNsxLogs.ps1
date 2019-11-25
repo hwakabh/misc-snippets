@@ -34,15 +34,15 @@ Write-Host "PasswordFilePath :`t $passwordFilePath"
 Write-Host ""
 
 # Read password from file and make credentials
-$password = Get-Content $passwordFilePath | ConvertTo-SecureString
-$credential = New-Object -TypeName System.Management.Automation.PsCredential `
-    -ArgumentList $username, $password
+$PasswordContent = Get-Content $passwordFilePath | ConvertTo-SecureString
+$nsxPassword =  [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($PasswordContent)
+$nsxRawPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($nsxPassword)
 Write-Host ">>> Reading SecureString done"
 Write-Host ""
 
 
 # Pre-configuration for Invoke-WebRequest with ignoring TLS and with BASIC Authentication
-$basicAuth = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($nsxUsername + ":" + $nsxPassword))
+$basicAuth = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($nsxUsername + ":" + $nsxRawPassword))
 $header = @{
     "Authorization" = "Basic $basicAuth";
     "Content-Type" = "application/json";
