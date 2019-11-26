@@ -55,9 +55,19 @@ Disconnect-VIServer -Server "<VCENTER_FQDN>"
       - The script would be read the input file `vmList.txt`, and call the `StartVM` commandlet with the order described in the file.
   - Managing ESXi Hosts
     - `setHostMaintenanceMode.ps1`
+      - Set all ESXi Hosts within provided cluster to maintenance mode.
     - `exitHostMaintenanceMode.ps1`
+      - Recovery all ESXi Hosts within provided cluster from maintenance mode.
     - `shutdownHosts.ps1`
+      - Power off all ESXi Hosts within provided cluster.
+      - If ESXi Host would not be under maintenance mode, nothing to do.
   - Managing Log-Bundles
     - `getEsxiLogBundles.ps1`
+      - Collecting ESXi support-bundles, `vm-support`,  by cluster provided as command-line arguments via vSphere Automation API.
+      - Downloading the bundles retrieved and making easy to collect support logs.
     - `getVcenterLogBundle.ps1`
+      - Collecting vCenter Server support-bundles, `vc-support`, via vSphere Automation API.
+      - Downloading the bundles retrieved and making easy to collect support logs.
     - `getNsxLogs.ps1`
+      - Collecting and downloading NSX-T's support-bundles to your local machine via NSX-T REST-API, Policy API.
+      - User could specify the target to collect with command-line arguments, `-targetMgrs` and `-targetEdges`.
