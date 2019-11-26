@@ -35,6 +35,10 @@ Disconnect-VIServer -Server "<VCENTER_FQDN>"
 - Within the file, commend-out with `#` would be supported for each description.
 
 - `credentials.txt`
+  - Provide the credentials of vSphere and NSX-T Manager
+  - Modify the path to password files of credentials
+    - Please refer the procedures to create password file with PowerShell SecureString.
+  - Add the parameters to each script.
 
 ***
 
