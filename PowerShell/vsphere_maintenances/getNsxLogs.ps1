@@ -112,7 +112,7 @@ foreach ($edge in $targetEdgeNodes) {
 
     # If multiplue edge configured, find olnly matched with value of $edge
     $edgeUuid = $edgeRes.results |Where-Object {$_.display_name -eq $edge} |Select-Object -Property id
-    Write-Host "Target Edge TransportNode UUID : $edgeUuid"
+    Write-Host "Target Edge TransportNode UUID : $($edgeUuid.Id)"
     Write-Host ""
 
     Write-Host ">>> HTTP POST to [ $mgr ] for downloading edge [ $($edgeUuid.Id) ] bundles ..."
