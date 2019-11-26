@@ -67,6 +67,7 @@ add-type @"
 # -- NSX-T Manager(s)
 foreach ($mgr in $targetMgrs) {
     Write-Host ">>> Start to download NSX-T Manager [ $mgr ] support-bundles, it might take some time ..."
+    $mgrLogBundleName = (Get-Date -Format "yyyyMMdd_HHmmss") + "_" + $mgr + "_support-bundle.tgz"
 
     Write-Host ">>> HTTP GET [ $mgr ]  UUID to POST ..."
     $ErrorActionPreference = "continue"
@@ -88,7 +89,7 @@ foreach ($mgr in $targetMgrs) {
         $postUri = "https://" + $mgr + "/api/v1/administration/support-bundles?action=collect"
         $reqBody = "{`"nodes`": [`"$($mgrUuid)`"]}"
         # TODO: Check user requirements of timeoutsec
-        Invoke-RestMethod -Uri $postUri -Method Post -Headers $header -Body $reqBody -TimeoutSec $timeoutSec -OutFile $downloadPath
+        Invoke-RestMethod -Uri $postUri -Method Post -Headers $header -Body $reqBody -TimeoutSec $timeoutSec -OutFile (Join-Path -Path $downloadPath -ChildPath $mgrLogBundleName)
     } catch {
         Write-Host "Failed to HTTP POST to NSX-T Manager [ $mgr ] Policy API ..."
     }
@@ -98,6 +99,7 @@ foreach ($mgr in $targetMgrs) {
 # -- NSX-T Edge(s)
 foreach ($edge in $targetEdgeNodes) {
     Write-Host ">>> Start to download NSX-T Edge [ $edge ] support-bundles, it might take some time ..."
+    $edgeLogBundleName = (Get-Date -Format "yyyyMMdd_HHmmss") + "_" + $edge + "_support-bundle.tgz"
 
     Write-Host ">>> HTTP GET [ $edge ]  UUID to POST ..."
     $ErrorActionPreference = "continue"
@@ -118,7 +120,7 @@ foreach ($edge in $targetEdgeNodes) {
         $postUri = "https://" + $mgr + "/api/v1/administration/support-bundles?action=collect"
         $reqBody = "{`"nodes`": [`"$($edgeUuid.Id)`"]}"
         # TODO: Check user requirements of timeoutsec
-        Invoke-RestMethod -Uri $postUri -Method Post -Headers $header -Body $reqBody -TimeoutSec $timeoutSec -OutFile $downloadPath
+        Invoke-RestMethod -Uri $postUri -Method Post -Headers $header -Body $reqBody -TimeoutSec $timeoutSec -OutFile (Join-Path -Path $downloadPath -ChildPath $mgrLogBundleName)
     } catch {
         Write-Host "Failed to HTTP POST to NSX-T [ $mgr ] Policy API, the Edge log-bundle would not be downloaded ..."
     }
