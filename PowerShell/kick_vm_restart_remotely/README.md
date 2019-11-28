@@ -54,7 +54,7 @@ Connect-VIServer -Server vcsa01.nfvlab.local -Credentials $credential
   - The CP scripts of `rebootVm.ps1` would connect to ESXi Hosts directly with PowerCLI.
   - So, it requires to create files for them apart from for vCenter Server's above.
 
-``PowerShell
+```PowerShell
 $username = "root"
 $creds = Get-Credential
 $creds.Password | ConvertFrom-SecureString | Set-Content "esxi.secret"
