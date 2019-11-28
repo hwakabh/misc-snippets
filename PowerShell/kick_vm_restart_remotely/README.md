@@ -7,6 +7,7 @@
 ## Environment
 
 The Scripts in repository would be only tested under the environments below  
+Please check your PowerShell/PowerCLI versions with `$PSVersionTable` and `Get-PowerCLIVersion` command let  
 
 - Server on `parentScript.ps1` allocated
   - OS : Windows Server 2012R2 Standard
@@ -31,18 +32,35 @@ There are some pre-requirements for running these scripts
   - Also, the password file would be decrypted only by the user who would have encrypt.
     - So, if you have multiple remote servers on the system, you have to create the secret on each server.
 
+- Creating encrypted password file for vCenter Server
+
 ```PowerShell
 $username = "administrator@vsphere.local"
 $creds = Get-Credential
 #-> As pop-up shows, enter the credentials manually
-$creds.Password | ConvertFrom-SecureString | Set-Content "password.secret"
+$creds.Password | ConvertFrom-SecureString | Set-Content "vcenter.secret"
 #-> Save as PowerShell SecureString objects
 
 # Get password with secure from encrypted file
-$password = Get-Content "password.secret" | ConvertTo-SecureString
+$password = Get-Content "vcenter.secret" | ConvertTo-SecureString
 $credential = New-Object System.Management.Automation.PsCredential $username, $password
 
-# Checking
+# Checking with PS Object
 Connect-VIServer -Server vcsa01.nfvlab.local -Credentials $credential
 ```
+
+
+- Creating encrypted password file for ESXi Hosts
+  - The CP scripts of `rebootVm.ps1` would connect to ESXi Hosts directly with PowerCLI.
+  - So, it requires to create files for them apart from for vCenter Server's above.
+
+``PowerShell
+$username = "root"
+$creds = Get-Credential
+$creds.Password | ConvertFrom-SecureString | Set-Content "esxi.secret"
+$password = Get-Content "esxi.secret" | ConvertTo-SecureString
+$credential = New-Object System.Management.Automation.PsCredential $username, $password
+Connect-VIServer -Server vcsa01.nfvlab.local -Credentials $credential
+```
+
 
