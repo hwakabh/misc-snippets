@@ -1,14 +1,13 @@
 # Preset command-line argument
 Param(
-    # [parameter(mandatory=$true)][String]$configFilePath,    # Path of configruration file
-    # [parameter(mandatory=$true)][String]$downloadPath       # Local Path of downloading vc-support
+    [parameter(mandatory=$true)][String]$configFilePath,    # Path of configruration file
+    [parameter(mandatory=$true)][String]$downloadPath       # Local Path of downloading vc-support
     [parameter(mandatory=$true)][String[]]$targetMgrs,      # Target NSX-T Manager's IP/FQDN to retrieve support-bundle
     [parameter(mandatory=$true)][String[]]$targetEdgeNodes  # Target NSX-T Edge Nodes IP/FQDN to retrieve support-bundle
 )
 
 
-# TODO: Check user requirements to pass configFilePath as command-line arguments or not
-$lines = Get-Content ".\credentials.txt"
+$lines = Get-Content $configFilePath
 foreach ($line in $lines) {
     if($line -match "^$"){ continue }
     if($line -match "^#"){ continue }
@@ -25,11 +24,9 @@ Write-Host ""
 # Set input path
 $scriptRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
 $passwordFilePath = Join-Path -Path $scriptRoot -ChildPath $nsxPasswordFilename
-# $downloadPath = $scriptRoot
-$downloadPath = "C:\vmware"
 Write-Host ">>> Determine path parameters"
 Write-Host "RootPath :`t`t $scriptRoot"
-# Write-Host "Download Path :`t`t $downloadPath"
+Write-Host "Download Path :`t`t $downloadPath"
 Write-Host "PasswordFilePath :`t $passwordFilePath"
 Write-Host ""
 
@@ -88,7 +85,6 @@ foreach ($mgr in $targetMgrs) {
     try {
         $postUri = "https://" + $mgr + "/api/v1/administration/support-bundles?action=collect"
         $reqBody = "{`"nodes`": [`"$($mgrUuid)`"]}"
-        # TODO: Check user requirements of timeoutsec
         Invoke-RestMethod -Uri $postUri -Method Post -Headers $header -Body $reqBody -TimeoutSec $timeoutSec -OutFile (Join-Path -Path $downloadPath -ChildPath $mgrLogBundleName)
     } catch {
         Write-Host "Failed to HTTP POST to NSX-T Manager [ $mgr ] Policy API ..."
@@ -110,7 +106,7 @@ foreach ($edge in $targetEdgeNodes) {
         Write-Host "Failed to HTTP GET responses from NSX-T [ $mgr ] Policy API ..."
     }
 
-    # If multiplue edge configured, find olnly matched with value of $edge
+    # If multiplue edge configured, find only matched with value of $edge
     $edgeUuid = $edgeRes.results |Where-Object {$_.display_name -eq $edge} |Select-Object -Property id
     Write-Host "Target Edge TransportNode UUID : $($edgeUuid.Id)"
     Write-Host ""
@@ -119,7 +115,6 @@ foreach ($edge in $targetEdgeNodes) {
     try {
         $postUri = "https://" + $mgr + "/api/v1/administration/support-bundles?action=collect"
         $reqBody = "{`"nodes`": [`"$($edgeUuid.Id)`"]}"
-        # TODO: Check user requirements of timeoutsec
         Invoke-RestMethod -Uri $postUri -Method Post -Headers $header -Body $reqBody -TimeoutSec $timeoutSec -OutFile (Join-Path -Path $downloadPath -ChildPath $mgrLogBundleName)
     } catch {
         Write-Host "Failed to HTTP POST to NSX-T [ $mgr ] Policy API, the Edge log-bundle would not be downloaded ..."
