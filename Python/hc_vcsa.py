@@ -50,6 +50,7 @@ if __name__ == "__main__":
 
     vcsa = VCenter(ipaddress=VCSA_IP, username=VCSA_USERNAME, password=VCSA_PASSWORD)
     # vCSA status check (02-07)
+    print('>>> vCSA system status')
     ENDPOINTS = [
         {'DB storage status': '/rest/appliance/health/database-storage'},
         {'System Load Status': '/rest/appliance/health/load'},
@@ -66,3 +67,12 @@ if __name__ == "__main__":
             else:
                 status = 'Error: (status: {})'.format(responese['value'])
             print('>>> vCSA: {0}: \t[ {1} ]'.format(k, status))
+
+    # 08. vCSA Network status
+    print('>>> vCSA Network status')
+    response = vcsa.get('/rest/appliance/networking/interfaces')
+    if response['value'][0]['status'] == 'up':
+        nic_status = 'OK'
+    else:
+        nic_status = 'Error: (status: {})'.format(response['value'][0]['status'])
+    print('>>> vCSA: Management Interface Status: \t[ {} ]'.format(nic_status))
