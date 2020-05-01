@@ -20,4 +20,5 @@ if __name__ == "__main__":
         print()
         sys.exit(1)
     else:
+        print('>>> Starting to program !!')
         main(driver_path=WEB_DRIVER_PATH)

@@ -31,7 +31,7 @@ Secondary, we need to install Chrome webdriver to your enviroment, where the pro
 We can install the packages with package manager like `brew`, or download from the sites <https://sites.google.com/a/chromium.org/chromedriver/downloads> .  
 
 ```bash
-brew install chromedriver
+brew cask install chromedriver
 ```
 
 Also, since the Python scripts will try to fetch environmental variables in the codes,  
