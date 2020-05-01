@@ -25,9 +25,16 @@ If you use `virtualenv`, create your private virtual environment first, and inst
 pip install selenium
 ```
 
-### Setup
+### Setup webdriver
 
-Secondary, since the Python scripts will try to fetch environmental variables in the codes,  
+Secondary, we need to install Chrome webdriver to your enviroment, where the program runs.  
+We can install the packages with package manager like `brew`, or download from the sites <https://sites.google.com/a/chromium.org/chromedriver/downloads> .  
+
+```bash
+brew install chromedriver
+```
+
+Also, since the Python scripts will try to fetch environmental variables in the codes,  
 we need to set environmental variables of selenium chrome driver.  
 For example of `bash`, follow the commands below:
 
