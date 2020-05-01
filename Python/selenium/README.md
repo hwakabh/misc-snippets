@@ -21,6 +21,7 @@ Firstly it's required to install `selenium` package.
 If you use `virtualenv`, create your private virtual environment first, and install the selenium pacakge with pip.  
 
 ```bash
+# If you use virtual env: run `source ENV_NAME/bin/activate` first
 pip install selenium
 ```
 
