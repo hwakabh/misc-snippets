@@ -2,75 +2,11 @@ import yaml
 import sys
 import json
 
-from vcsa.vcsa import VCenter, VApi
+from vcsa.vcsa import VCenter, VApi, EsxiSoapParser
 from nsxt.nsxt import Nsxt
 from vio.vio import Vio
 from vrops.vrops import VROps
 from vrli.vrli import VRli
-
-
-# TODO: Refactor with migrating each methods as member methods of VApi
-def get_host_pnics(host):
-    host_pnics = []
-    for pnic in host.config.network.pnic:
-        pnic_info = dict()
-        pnic_info.update(
-            {'device': pnic.device, 'driver': pnic.driver, 'mac': pnic.mac})
-        host_pnics.append(pnic_info)
-    return host_pnics
-
-
-def get_host_vnics(host):
-    host_vnics = []
-    for vnic in host.config.network.vnic:
-        vnic_info = dict()
-        vnic_info.update(
-            {'device': vnic.device, 'portgroup': vnic.portgroup,
-             'dhcp': vnic.spec.ip.dhcp, 'ipAddress': vnic.spec.ip.ipAddress,
-             'subnetMask': vnic.spec.ip.subnetMask,
-             'mac': vnic.spec.mac, 'mtu': vnic.spec.mtu})
-        host_vnics.append(vnic_info)
-    return host_vnics
-
-
-def get_host_vswitches(host):
-    host_vswitches = []
-    for vswitch in host.config.network.vswitch:
-        vswitch_info = dict()
-        vswitch_pnics = []
-        vswitch_portgroups = []
-        for pnic in vswitch.pnic:
-            pnic = pnic.replace('key-vim.host.PhysicalNic-', '')
-            vswitch_pnics.append(pnic)
-        for pg in vswitch.portgroup:
-            pg = pg.replace('key-vim.host.PortGroup-', '')
-            vswitch_portgroups.append(pg)
-        vswitch_info.update(
-            {'name': vswitch.name, 'pnics': vswitch_pnics,
-             'portgroups': vswitch_portgroups, 'mtu': vswitch.mtu})
-        host_vswitches.append(vswitch_info)
-    return host_vswitches
-
-
-def get_host_portgroups(host):
-    host_portgroups = []
-    for portgroup in host.config.network.portgroup:
-        portgroup_info = dict()
-        portgroup_info.update(
-            {'name': portgroup.spec.name, 'vlanId': portgroup.spec.vlanId,
-             'vswitchName': portgroup.spec.vswitchName,
-             'nicTeamingPolicy': portgroup.spec.policy.nicTeaming.policy,
-             'allowPromiscuous': portgroup.spec.policy.security.allowPromiscuous,
-             'macChanges': portgroup.spec.policy.security.macChanges,
-             'forgedTransmits': portgroup.spec.policy.security.forgedTransmits})
-        host_portgroups.append(portgroup_info)
-    return host_portgroups
-
-
-def get_host_ssh_status(host):
-    services = host.configManager.serviceSystem
-    ssh_service = [s for s in services.serviceInfo.service if s.key == 'TSM-SSH'][0].running
-    return 'Running' if ssh_service == True else 'Error'
 
 
 def read_config_from_file(conf_file_path):
@@ -81,8 +17,10 @@ def read_config_from_file(conf_file_path):
 
 def main():
     CONFIG_FILE_PATH = './config.yaml'
+    # TODO: Add check existence of configuration file.
     config = read_config_from_file(conf_file_path=CONFIG_FILE_PATH)
 
+    # TODO: Split all functions by each product
     print('-----------------------------------------------------------')
     print('vCenter Server Configuration')
     print('-----------------------------------------------------------')
@@ -137,13 +75,14 @@ def main():
                 print('>>>>>> Managed ESXi Host configs')
                 vcsa_hosts = vc.get('/rest/vcenter/host?filter.clusters={}'.format(cluster['cluster']))
                 for host in vcsa_hosts['value']:
+                    esxi_parser = EsxiSoapParser()
                     host_info = dict()
                     print('>>>>>>>>> [ {} ] Network Configurations'.format(host['name']))
                     target_host = [esxi for esxi in esxis if esxi.name == host['name']][0]
-                    host_pnics = get_host_pnics(target_host)
-                    host_vnics = get_host_vnics(target_host)
-                    host_vswitches = get_host_vswitches(target_host)
-                    host_portgroups = get_host_portgroups(target_host)
+                    host_pnics = esxi_parser.get_host_pnics(target_host)
+                    host_vnics = esxi_parser.get_host_vnics(target_host)
+                    host_vswitches = esxi_parser.get_host_vswitches(target_host)
+                    host_portgroups = esxi_parser.get_host_portgroups(target_host)
                     host_info.update({
                         'pnics': host_pnics,
                         'vswitches': host_vswitches,
@@ -152,76 +91,76 @@ def main():
                     })
                     print(json.dumps(host_info, indent=3, separators=(',', ': ')))
                     print('>>>>>>>>> [ {} ] SSH configurations'.format(host['name']))
-                    print('SSH service : {}'.format(get_host_ssh_status(target_host)))
+                    print('SSH service : {}'.format(esxi_parser.get_host_ssh_status(target_host)))
                     print()
 
-    print()
-    print('-----------------------------------------------------------')
-    print('NSX-T Configuration')
-    print('-----------------------------------------------------------')
-    for nsxts in config['nsx']:
-        for nsxt in nsxts.values():
-            NSX_MGR = nsxt['hostname']
-            NSX_USERNAME = nsxt['username']
-            NSX_PASSWORD = nsxt['password']
-            print('NSX-T Manager: {}'.format(NSX_MGR))
-            nsx = Nsxt(ipaddress=NSX_MGR, username=NSX_USERNAME, password=NSX_PASSWORD)
-            # Fetch only management network information
-            print('>>> NSX-T Management Network information ...')
-            nsx_networks = nsx.get('/api/v1/node/network/interfaces')
-            print('IP Address: \t{}'.format(nsx_networks['results'][0]['ip_addresses'][0]['ip_address']))
-            print('Netmask: \t{}'.format(nsx_networks['results'][0]['ip_addresses'][0]['netmask']))
-            print('Gateway: \t{}'.format(nsx_networks['results'][0]['default_gateway']))
+    # print()
+    # print('-----------------------------------------------------------')
+    # print('NSX-T Configuration')
+    # print('-----------------------------------------------------------')
+    # for nsxts in config['nsx']:
+    #     for nsxt in nsxts.values():
+    #         NSX_MGR = nsxt['hostname']
+    #         NSX_USERNAME = nsxt['username']
+    #         NSX_PASSWORD = nsxt['password']
+    #         print('NSX-T Manager: {}'.format(NSX_MGR))
+    #         nsx = Nsxt(ipaddress=NSX_MGR, username=NSX_USERNAME, password=NSX_PASSWORD)
+    #         # Fetch only management network information
+    #         print('>>> NSX-T Management Network information ...')
+    #         nsx_networks = nsx.get('/api/v1/node/network/interfaces')
+    #         print('IP Address: \t{}'.format(nsx_networks['results'][0]['ip_addresses'][0]['ip_address']))
+    #         print('Netmask: \t{}'.format(nsx_networks['results'][0]['ip_addresses'][0]['netmask']))
+    #         print('Gateway: \t{}'.format(nsx_networks['results'][0]['default_gateway']))
 
-            print('>>> NSX-T Hostname configuration ...')
-            nsx_hostname = nsx.get('/api/v1/node')
-            print('Hostname: \t{}'.format(nsx_hostname['fully_qualified_domain_name']))
+    #         print('>>> NSX-T Hostname configuration ...')
+    #         nsx_hostname = nsx.get('/api/v1/node')
+    #         print('Hostname: \t{}'.format(nsx_hostname['fully_qualified_domain_name']))
 
-            print('>>> NSX-T DNS configuration ...')
-            nsx_dns = nsx.get('/api/v1/node/network/name-servers')
-            print('DNS Servers: \t{}'.format(nsx_dns['name_servers']))
+    #         print('>>> NSX-T DNS configuration ...')
+    #         nsx_dns = nsx.get('/api/v1/node/network/name-servers')
+    #         print('DNS Servers: \t{}'.format(nsx_dns['name_servers']))
 
-            print('>>> NSX-T NTP configuration ...')
-            nsx_ntp = nsx.get('/api/v1/node/services/ntp')
-            print('NTP Servers: \t{}'.format(nsx_ntp['service_properties']['servers']))
-            print('-----------------------------------------------------------')
+    #         print('>>> NSX-T NTP configuration ...')
+    #         nsx_ntp = nsx.get('/api/v1/node/services/ntp')
+    #         print('NTP Servers: \t{}'.format(nsx_ntp['service_properties']['servers']))
+    #         print('-----------------------------------------------------------')
 
-    print()
-    print('-----------------------------------------------------------')
-    print('VIO Configuration')
-    print('-----------------------------------------------------------')
-    for vios in config['vio']:
-        for vio in vios.values():
-            VIO_MGR = vio['hostname']
-            VIO_USERNAME = vio['username']
-            VIO_PASSWORD = vio['password']
-            print('VIO Manager: {}'.format(VIO_MGR))
-            viomgr = Vio(ipaddress=VIO_MGR, username=VIO_USERNAME, password=VIO_PASSWORD)
+    # print()
+    # print('-----------------------------------------------------------')
+    # print('VIO Configuration')
+    # print('-----------------------------------------------------------')
+    # for vios in config['vio']:
+    #     for vio in vios.values():
+    #         VIO_MGR = vio['hostname']
+    #         VIO_USERNAME = vio['username']
+    #         VIO_PASSWORD = vio['password']
+    #         print('VIO Manager: {}'.format(VIO_MGR))
+    #         viomgr = Vio(ipaddress=VIO_MGR, username=VIO_USERNAME, password=VIO_PASSWORD)
 
-            print('>>> VIO Network information ...')
-            vio_networks = viomgr.get('/apis/vio.vmware.com/v1alpha1/namespaces/openstack/vioclusters/viocluster1')
-            print('> Management Network')
-            print('IP Ranges: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['ip_ranges']))
-            print('Netmask: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['netmask']))
-            print('Gateway: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['gateway']))
-            print('> API Network')
-            print('IP Ranges: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['ip_ranges']))
-            print('Netmask: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['netmask']))
-            print('Gateway: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['gateway']))
-            vio_nodes = viomgr.get('/api/v1/nodes')
-            print('> manager/controller nodes')
-            for node in vio_nodes['items']:
-                print('Nodename: \t{}'.format(node['metadata']['name']))
-                print('  PodCIDR: \t{}'.format(node['spec']['podCIDR']))
-                print('  IntIP: \t{}'.format(node['status']['addresses'][0]['address']))
-                print('  ExtIP: \t{}'.format(node['status']['addresses'][1]['address']))
-            print('>>> VIO DNS configurations ...')
-            print('> Management Network')
-            print('DNS Servers: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['dns']))
-            print('> API Network')
-            print('DNS Servers: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['dns']))
-            # TODO: Research NTP API Endpoints for Kubernetes
-            print('-----------------------------------------------------------')
+    #         print('>>> VIO Network information ...')
+    #         vio_networks = viomgr.get('/apis/vio.vmware.com/v1alpha1/namespaces/openstack/vioclusters/viocluster1')
+    #         print('> Management Network')
+    #         print('IP Ranges: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['ip_ranges']))
+    #         print('Netmask: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['netmask']))
+    #         print('Gateway: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['gateway']))
+    #         print('> API Network')
+    #         print('IP Ranges: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['ip_ranges']))
+    #         print('Netmask: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['netmask']))
+    #         print('Gateway: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['gateway']))
+    #         vio_nodes = viomgr.get('/api/v1/nodes')
+    #         print('> manager/controller nodes')
+    #         for node in vio_nodes['items']:
+    #             print('Nodename: \t{}'.format(node['metadata']['name']))
+    #             print('  PodCIDR: \t{}'.format(node['spec']['podCIDR']))
+    #             print('  IntIP: \t{}'.format(node['status']['addresses'][0]['address']))
+    #             print('  ExtIP: \t{}'.format(node['status']['addresses'][1]['address']))
+    #         print('>>> VIO DNS configurations ...')
+    #         print('> Management Network')
+    #         print('DNS Servers: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['dns']))
+    #         print('> API Network')
+    #         print('DNS Servers: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['dns']))
+    #         # TODO: Research NTP API Endpoints for Kubernetes
+    #         print('-----------------------------------------------------------')
 
     print()
     print('-----------------------------------------------------------')
