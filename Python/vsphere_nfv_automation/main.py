@@ -173,17 +173,21 @@ def main():
             VROPS_PASSWORD = vrops['password']
             print('vROps: {}'.format(VROPS_IPADDR))
             vrops_api = VROps(ipaddress=VROPS_IPADDR, username=VROPS_USERNAME, password=VROPS_PASSWORD)
+            vrops_nodeconf = vrops_api.get('/casa/node/config')
+            vrops_ip = vrops_api.get('/casa/node/status')
+
             # TODO: Add functions to get deployment rule(currently vROps in Labs are non-clustered)
+            print('>>> Version information')
+            print('{}'.format(vrops_nodeconf['product_version']))
 
             print('>>> vROps Network information ...')
-            vrops_ip = vrops_api.get('/casa/node/status')
             print('IP Address: \t{}'.format(vrops_ip['address']))
-            vrops_nodeconf = vrops_api.get('/casa/node/config')
             print('Netmask: \t{}'.format(vrops_nodeconf['network_properties']['network1_netmask']))
             print('Gateway: \t{}'.format(vrops_nodeconf['network_properties']['default_gateway']))
 
             print('>>> vROps Hostname configuration ...')
             print('Nodename: \t{}'.format(vrops_nodeconf['node_name']))
+            print('Deployment Role: \t{}'.format(vrops_nodeconf['node_type']))
 
             print('>>> vROps DNS configuration ...')
             print('DNS Servers: \t{}'.format(vrops_nodeconf['network_properties']['domain_name_servers']))
