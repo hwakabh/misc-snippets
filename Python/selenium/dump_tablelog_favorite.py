@@ -1,18 +1,25 @@
 import csv
+import pyperclip
+import os
+import sys
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
-import pyperclip
 
 
-FACEBOOK_ID = 'hrykwkbys1024@yahoo.co.jp'
-FACEBOOK_PASSWORD = 'gaku1991'
+FACEBOOK_ID = os.environ.get('FACEBOOK_ID', None)
+FACEBOOK_PASSWORD = os.environ.get('FACEBOOK_PASSWORD', None)
+CHROME_DRIVER_PATH = os.environ.get('CHROME_DRIVER_PATH', None)
 
+if (FACEBOOK_ID == None) or (FACEBOOK_PASSWORD == None) or (CHROME_DRIVER_PATH == None):
+    print(">>> Error, missing environmental variable config.")
+    sys.exit(1)
 
-driver = webdriver.Chrome(executable_path='/Users/hwakabayashi/chromedriver')
+driver = webdriver.Chrome(executable_path=CHROME_DRIVER_PATH)
 driver.get('https://tabelog.com/')
 # Login with Facebook account
 driver.find_element_by_class_name('js-open-login-modal').click()
