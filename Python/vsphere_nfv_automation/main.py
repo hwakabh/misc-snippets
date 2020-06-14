@@ -7,6 +7,7 @@ from nsxt.nsxt import Nsxt
 from vio.vio import Vio
 from vrops.vrops import VROps
 from vrli.vrli import VRli
+from vrni.vrni import VRni
 
 
 def read_config_from_file(conf_file_path):
@@ -274,6 +275,25 @@ def main():
             print('Status: {}'.format(vrli_vidm_status['state']))
             vrli_vidms = vrli_api.get('/api/v1/vidm')
             print(json.dumps(vrli_vidms, indent=3, separators=(',', ': ')))
+
+    print()
+    print('-----------------------------------------------------------')
+    print('vRNI Configuration')
+    print('-----------------------------------------------------------')
+    for vrnis in config['vrni']:
+        for vrni in vrnis.values():
+            VRNI_IPADDR = vrni['hostname']
+            VRNI_USERNAME = vrni['username']
+            VRNI_PASSWORD = vrni['password']
+            VRNI_DOMAIN = vrni['domain']
+            print('vRNI: {}'.format(VRNI_IPADDR))
+            vrni_api = VRni(ipaddress=VRNI_IPADDR, username=VRNI_USERNAME, password=VRNI_PASSWORD, domain=VRNI_DOMAIN)
+
+            print('>>> Version information')
+            vrni_version = vrni_api.get('/api/ni/info/version')
+            print(vrni_version)
+            # print('{0} (Release Type: {1})'.format(vrli_version['version'], vrli_version['releaseName']))
+
 
 
 if __name__ == "__main__":

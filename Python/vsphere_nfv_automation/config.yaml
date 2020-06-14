@@ -33,4 +33,10 @@ vrli:
       username: admin
       password: VMware1!
       provider: Local
+vrni:
+  - server_1:
+      hostname: vrni02.nfvlab.local
+      username: admin@local
+      password: VMware1!
+      domain: LOCAL
 ...
