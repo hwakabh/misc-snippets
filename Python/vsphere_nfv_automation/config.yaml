@@ -3,9 +3,9 @@ vcenter:
   - hostname: vcsa02.nfvlab.local
     username: administrator@vsphere.local
     password: VMware1!
-  - hostname: vcsa01.nfvlab.local
-    username: administrator@vsphere.local
-    password: VMware1!
+  # - hostname: vcsa01.nfvlab.local
+  #   username: administrator@vsphere.local
+  #   password: VMware1!
 nsx:
   - hostname: nsxmgr02.nfvlab.local
     username: admin
@@ -25,7 +25,7 @@ vrops:
     username: admin
     password: VMware1!
 vrli:
-  - hostname: 172.16.111.20
+  - hostname: vrli.nfvlab.local
     username: admin
     password: VMware1!
     provider: Local

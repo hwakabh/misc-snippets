@@ -22,7 +22,7 @@ def get_vcenter_configs(config):
         IPADDRESS = cfg['hostname']
         USERNAME = cfg['username']
         PASSWORD = cfg['password']
-        print('------ Starting config_dump for vCenter Server: {} -----'.format(IPADDRESS))
+        print('------ Starting config_dump for vCSA: {}'.format(IPADDRESS))
         # Call vSphere REST-API to fetch vCSA config
         vc = VCenter(ipaddress=IPADDRESS, username=USERNAME, password=PASSWORD)
         vcsa_networks = vc.get('/rest/appliance/networking/interfaces')
@@ -30,6 +30,9 @@ def get_vcenter_configs(config):
         vcsa_dns = vc.get('/rest/appliance/networking/dns/servers')
         vcsa_ntp = vc.get('/rest/appliance/ntp')
         vcsa_ssh_status = vc.get('/rest/appliance/access/ssh')
+
+        vcsa_dc = vc.get('/rest/vcenter/datacenter')
+        vcsa_clusters = vc.get('/rest/vcenter/cluster')
 
         # Call vAPI to get ESXi host configs
         vapi = VApi(ipaddress=IPADDRESS, username=USERNAME, password=PASSWORD)
@@ -41,7 +44,7 @@ def get_vcenter_configs(config):
         print('Hostname: \t{}'.format(vcsa_hostnames['value']))
         print('DNS Servers: \t{}'.format(vcsa_dns['value']['servers']))
         print('NTP Servers: \t{}'.format(vcsa_ntp['value']))
-        print('SSH Services: {}'.format('Running' if vcsa_ssh_status['value'] == True else 'Not Running'))
+        print('SSH Services: \t{}'.format('Running' if vcsa_ssh_status['value'] == True else 'Not Running'))
 
         print('>>> vCHA configurations ...')
         vcsa_ha = vc.post('/rest/vcenter/vcha/cluster?action=get')
@@ -52,20 +55,20 @@ def get_vcenter_configs(config):
 
         # Retrieve all hostdata prior to compare with response of vSphere REST-API
         esxis = vapi.get_host_objects()
-        print('>>> Datacenters')
-        vcsa_dc = vc.get('/rest/vcenter/datacenter')
+        # print('>>> Datacenters')
         for dc in vcsa_dc['value']:
-            print('Name: {}'.format(dc['name']))
-        print('>>> Clusters')
-        vcsa_clusters = vc.get('/rest/vcenter/cluster')
+            print('>>> Datacenter: {}'.format(dc['name']))
+        # print('>>> Clusters')
         for cluster in vcsa_clusters['value']:
-            print('Name: {0}\t(DRS Enabled : {1}, HA Enabled : {2})'.format(cluster['name'], cluster['drs_enabled'], cluster['ha_enabled']))
+            print('>>> Cluster : {}'.format(cluster['name']))
+            print('DRS Enabled:\t{}'.format(cluster['drs_enabled']))
+            print('HA Enabled:\t{}'.format(cluster['ha_enabled']))
             print('>>>>>> Managed ESXi Host configs')
             vcsa_hosts = vc.get('/rest/vcenter/host?filter.clusters={}'.format(cluster['cluster']))
             for host in vcsa_hosts['value']:
                 esxi_parser = EsxiSoapParser()
                 host_info = dict()
-                print('>>>>>>>>> [ {} ] Network Configurations'.format(host['name']))
+                print('>>>>>>>>> {}'.format(host['name']))
                 target_host = [esxi for esxi in esxis if esxi.name == host['name']][0]
                 host_pnics = esxi_parser.get_host_pnics(target_host)
                 host_vnics = esxi_parser.get_host_vnics(target_host)
@@ -77,10 +80,26 @@ def get_vcenter_configs(config):
                     'portgroups': host_portgroups,
                     'vnics': host_vnics
                 })
-                print(json.dumps(host_info, indent=3, separators=(',', ': ')))
-                print('>>>>>>>>> [ {} ] SSH configurations'.format(host['name']))
-                print('SSH service :\t{}'.format(esxi_parser.get_host_ssh_status(target_host)))
-                print()
+                print('vmnics:')
+                for vmnic in host_pnics:
+                    print('\t[ {0} ] MAC addr= {1}, driver={2}'.format(vmnic['device'], vmnic['mac'], vmnic['driver']))
+                print('vmkernel ports:')
+                for vmk in host_vnics:
+                    # TODO: merge info about vmk gateway
+                    print('\t[ {0} ] IP Address= {1}, Subnet Mask={2}, MAC addr={3}, MTU={4}'.format(vmk['device'], vmk['ipAddress'], vmk['subnetMask'], vmk['mac'], vmk['mtu']))
+                print('vSwitch(vSS):')
+                for vss in host_vswitches:
+                    print('\t[ {0} ] Uplinks={1}, PortGroups={2}, MTU={3}'.format(vss['name'], vss['pnics'], vss['portgroups'], vss['mtu']))
+                print('portgroups:')
+                for pg in host_portgroups:
+                    print('\t[ {0} ] VLAN={1}, vSwitchName={2}'.format(pg['name'], pg['vlanId'], pg['vswitchName']))
+
+                # print(json.dumps(host_info, indent=3, separators=(',', ': ')))
+                # print('>>>>>>>>> [ {} ] SSH configurations'.format(host['name']))
+                print('SSH service : {}'.format(esxi_parser.get_host_ssh_status(target_host)))
+            print()
+            print('---')
+            print()
     print()
 
     # TODO: Return JSON value with parsed
@@ -92,7 +111,7 @@ def get_nsxt_configs(config):
         NSX_MGR = cfg['hostname']
         NSX_USERNAME = cfg['username']
         NSX_PASSWORD = cfg['password']
-        print('------ Starting config_dump for NSX-T Manager: {} -----'.format(NSX_MGR))
+        print('------ Starting config_dump for NSX-T Manager: {}'.format(NSX_MGR))
         nsx = Nsxt(ipaddress=NSX_MGR, username=NSX_USERNAME, password=NSX_PASSWORD)
         # Fetch only management network information
         print('>>> Management Network information ...')
@@ -123,7 +142,7 @@ def get_vio_configs(config):
         VIO_MGR = cfg['hostname']
         VIO_USERNAME = cfg['username']
         VIO_PASSWORD = cfg['password']
-        print('------ Starting config_dump for VIO Manager: {} -----'.format(VIO_MGR))
+        print('------ Starting config_dump for VIO Manager: {}'.format(VIO_MGR))
         viomgr = Vio(ipaddress=VIO_MGR, username=VIO_USERNAME, password=VIO_PASSWORD)
         vio_networks = viomgr.get('/apis/vio.vmware.com/v1alpha1/namespaces/openstack/vioclusters/viocluster1')
         vio_nodes = viomgr.get('/api/v1/nodes')
@@ -158,7 +177,7 @@ def get_vrni_configs(config):
         VRNI_USERNAME = cfg['username']
         VRNI_PASSWORD = cfg['password']
         VRNI_DOMAIN = cfg['domain']
-        print('------ Starting config_dump for vRNI: {} -----'.format(VRNI_IPADDR))
+        print('------ Starting config_dump for vRNI: {}'.format(VRNI_IPADDR))
         vrni = VRni(ipaddress=VRNI_IPADDR, username=VRNI_USERNAME, password=VRNI_PASSWORD, domain=VRNI_DOMAIN)
         version_info = vrni.get('/api/ni/info/version')
         nodes_info = vrni.get('/api/ni/infra/nodes')
@@ -197,7 +216,7 @@ def get_vrli_configs(config):
         VRLI_USERNAME = cfg['username']
         VRLI_PASSWORD = cfg['password']
         VRLI_PROVIDER = cfg['provider']
-        print('------ Starting config_dump for vRLI: {} -----'.format(VRLI_IPADDR))
+        print('------ Starting config_dump for vRLI: {}'.format(VRLI_IPADDR))
         vrli = VRli(ipaddress=VRLI_IPADDR, username=VRLI_USERNAME, password=VRLI_PASSWORD, provider=VRLI_PROVIDER)
         version_info = vrli.get('/api/v1/version')
         cluster_info = vrli.get('/api/v1/cluster/vips')
@@ -255,7 +274,7 @@ def get_vrops_configs(config):
         VROPS_IPADDR = cfg['hostname']
         VROPS_USERNAME = cfg['username']
         VROPS_PASSWORD = cfg['password']
-        print('------ Starting config_dump for vROps: {} -----'.format(VROPS_IPADDR))
+        print('------ Starting config_dump for vROps: {}'.format(VROPS_IPADDR))
         # Instanciate vROps class
         vrops = VROps(ipaddress=VROPS_IPADDR, username=VROPS_USERNAME, password=VROPS_PASSWORD)
 
@@ -334,43 +353,37 @@ if __name__ == "__main__":
 
     print('>>> Start collecting configurations, this might take some time ...')
     print()
-    print('-----------------------------------------------------------')
-    print()
+    print('--------------------------------------------------------------------')
     print('### vCenter Server ')
     print()
-    vcenter_configs = get_vcenter_configs(config=configs.get('vcenter'))
+    # vcenter_configs = get_vcenter_configs(config=configs.get('vcenter'))
     print()
-    print('-----------------------------------------------------------')
-    print()
+    print('--------------------------------------------------------------------')
     print('### NSX-T Manager')
     print()
     nsxt_configs = get_nsxt_configs(config=configs.get('nsx'))
     print()
-    print('-----------------------------------------------------------')
-    print()
+    print('--------------------------------------------------------------------')
     print('### VMware Integrated OpenStack')
     print()
     vio_configs = get_vio_configs(config=configs.get('vio'))
     print()
-    print('-----------------------------------------------------------')
-    print()
+    print('--------------------------------------------------------------------')
     print('### vRealize Operations Manager')
     print()
     vrops_configs = get_vrops_configs(config=configs.get('vrops'))
     print()
-    print('-----------------------------------------------------------')
-    print()
+    print('--------------------------------------------------------------------')
     print('### vRealize Log Insight')
     print()
     vrli_configs = get_vrli_configs(config=configs.get('vrli'))
     print()
-    print('-----------------------------------------------------------')
-    print()
+    print('--------------------------------------------------------------------')
     print('### vRealize Network Insight')
     print()
     vrni_configs = get_vrni_configs(config=configs.get('vrni'))
     print()
-    print('-----------------------------------------------------------')
+    print('--------------------------------------------------------------------')
     print()
     print('>>> All configuration dumped !!')
     # TODO: print path of logfile and dumped file as stdout
