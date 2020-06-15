@@ -1,5 +1,6 @@
 import yaml
 import sys
+import os
 import json
 
 from vcsa.vcsa import VCenter, VApi, EsxiSoapParser
@@ -254,8 +255,12 @@ def get_vrops_configs(config):
 
 def main():
     CONFIG_FILE_PATH = './config.yaml'
-    # TODO: Add check existence of configuration file.
-    configs = read_config_from_file(conf_file_path=CONFIG_FILE_PATH)
+    if os.path.exists(CONFIG_FILE_PATH):
+        configs = read_config_from_file(conf_file_path=CONFIG_FILE_PATH)
+    else:
+        print('Provided configuration file path is wrong.')
+        print('Configuration file is expected to be allocated on ./config.yaml.')
+        sys.exit(1)
 
     # # TODO: Split all functions by each product
     # print('-----------------------------------------------------------')
