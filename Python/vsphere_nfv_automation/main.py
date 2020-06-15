@@ -191,33 +191,35 @@ def get_vrops_configs(config):
         # Instanciate vROps class
         vrops = VROps(ipaddress=VROPS_IPADDR, username=VROPS_USERNAME, password=VROPS_PASSWORD)
 
-        # Fetch all info required
-        node_conf = vrops.get('/casa/node/config')
-        ip_conf = vrops.get('/casa/node/status')
+        # Fetch all info from CaSA API
+        node_conf = vrops.casa_get('/casa/node/config')
+        ip_conf = vrops.casa_get('/casa/node/status')
+        # Fetch all info from Suite API
+        auth_src_ids = [i['id'] for i in vrops.get('/suite-api/api/auth/sources')['sources']]
+        mp_info = vrops.get('/suite-api/api/solutions')
+        adapter_info = vrops.get('/suite-api/api/adapters')
+        snmp_info = vrops.get('/suite-api/api/alertplugins')
 
         print('>>> Version information')
         print('{}'.format(node_conf['product_version']))
 
-        print('>>> vROps Network information ...')
+        print('>>> Network information ...')
         print('IP Address: \t{}'.format(ip_conf['address']))
         print('Netmask: \t{}'.format(node_conf['network_properties']['network1_netmask']))
         print('Gateway: \t{}'.format(node_conf['network_properties']['default_gateway']))
 
-        print('>>> vROps Hostname configuration ...')
+        print('>>> Hostname configuration ...')
         print('Nodename: \t{}'.format(node_conf['node_name']))
         print('Deployment Role: \t{}'.format(node_conf['node_type']))
 
-        print('>>> vROps DNS configuration ...')
+        print('>>> DNS configuration ...')
         print('DNS Servers: \t{}'.format(node_conf['network_properties']['domain_name_servers']))
         print('Domain Name: \t{}'.format(node_conf['network_properties']['domain_name']))
-        print('Search Path: \t{}'.format(node_conf['network_properties']['domain_search_path']))
 
-        print('>>> vROps NTP configuration ...')
+        print('>>> NTP configuration ...')
         print('NTP Servers: \t{}'.format(node_conf['ntp_servers']))
-
-        # TODO: Add member methods to authenticate with suite-api, since BASIC auth depreciated
+        print()
         print('>>> Authentication sources')
-        auth_src_ids = [i['id'] for i in vrops.get('/suite-api/api/auth/sources')['sources']]
         for auth_src_id in auth_src_ids:
             auth_detail = vrops.get('/suite-api/api/auth/sources/{}'.format(auth_src_id))
             auth_name = auth_detail.get('name', None)
@@ -225,27 +227,26 @@ def get_vrops_configs(config):
                 print('>>>>>> {}'.format(auth_name))
                 print('Source ID: {}'.format(auth_src_id))
                 print('Type: {}'.format(auth_detail['sourceType']['id']))
-                if auth_detail['property']:
-                    for d in auth_detail['property']:
-                        print(d)
+
         print('>>> Installed Management Packs')
-        mp_info = vrops.get('/suite-api/api/solutions')
         for mp in mp_info['solution']:
             print('{0} (Version : {1})'.format(mp['name'], mp['version']))
-        print('>>> Configured Adapters')
-        adapter_info = vrops.get('/suite-api/api/adapters')
-        for adapter in adapter_info['adapterInstancesInfoDto']:
-            print('{0} (ID: {1})'.format(adapter['resourceKey']['name'], adapter['id']))
 
+        print('>>> Configured Adapters')
+        for adapter in adapter_info['adapterInstancesInfoDto']:
+            print('ID: {0}, Name: {1}'.format(adapter['id'], adapter['resourceKey']['name']))
+
+        # TODO: handle stdout whether Tranp configured or not
         print('>>> SNMP Configurations')
-        snmp_info = vrops.get('/suite-api/api/alertplugins')
-        vrops_snmp_config = dict()
+        vrops_snmp_config = {}
         for snmp in snmp_info['notificationPluginInstances']:
             if snmp['pluginTypeId'] == 'SNMP Trap':
                 vrops_snmp_config = snmp['configValues']
-        if vrops_snmp_config is not None:
+        if vrops_snmp_config is not {}:
             for s in vrops_snmp_config:
                 print(s)
+
+        print()
 
     # TODO: Should be return JSON value simplified
     return None
@@ -335,20 +336,20 @@ def main():
     print()
     print('### NSX-T Manager')
     print()
-    nsxt_configs = get_nsxt_configs(config=configs.get('nsx'))
+    # nsxt_configs = get_nsxt_configs(config=configs.get('nsx'))
     print()
     print('-----------------------------------------------------------')
     print()
     print('### VMware Integrated OpenStack')
     print()
-    vio_configs = get_vio_configs(config=configs.get('vio'))
+    # vio_configs = get_vio_configs(config=configs.get('vio'))
     print()
     print('-----------------------------------------------------------')
     print()
     print('### vRealize Operations Manager')
     print()
     # # TODO: Add functions to get deployment rule(currently vROps in Labs are non-clustered)
-    # vrops_configs = get_vrops_configs(config=configs.get('vrops'))
+    vrops_configs = get_vrops_configs(config=configs.get('vrops'))
     print()
     print('-----------------------------------------------------------')
     print()
