@@ -18,7 +18,73 @@ def read_config_from_file(conf_file_path):
 
 
 def get_vcenter_configs(config):
-    pass
+    for cfg in config:
+        IPADDRESS = cfg['hostname']
+        USERNAME = cfg['username']
+        PASSWORD = cfg['password']
+        print('------ Starting config_dump for vCenter Server: {} -----'.format(IPADDRESS))
+        # Call vSphere REST-API to fetch vCSA config
+        vc = VCenter(ipaddress=IPADDRESS, username=USERNAME, password=PASSWORD)
+        vcsa_networks = vc.get('/rest/appliance/networking/interfaces')
+        vcsa_hostnames = vc.get('/rest/appliance/networking/dns/hostname')
+        vcsa_dns = vc.get('/rest/appliance/networking/dns/servers')
+        vcsa_ntp = vc.get('/rest/appliance/ntp')
+        vcsa_ssh_status = vc.get('/rest/appliance/access/ssh')
+
+        # Call vAPI to get ESXi host configs
+        vapi = VApi(ipaddress=IPADDRESS, username=USERNAME, password=PASSWORD)
+
+        print('>>> Appliance configurations ...')
+        print('IP address: \t{}'.format(vcsa_networks['value'][0]['ipv4']['address']))
+        print('Subnet Prefix: \t{}'.format(vcsa_networks['value'][0]['ipv4']['prefix']))
+        print('Gateway: \t{}'.format(vcsa_networks['value'][0]['ipv4']['default_gateway']))
+        print('Hostname: \t{}'.format(vcsa_hostnames['value']))
+        print('DNS Servers: \t{}'.format(vcsa_dns['value']['servers']))
+        print('NTP Servers: \t{}'.format(vcsa_ntp['value']))
+        print('SSH Services: {}'.format('Running' if vcsa_ssh_status['value'] == True else 'Not Running'))
+
+        print('>>> vCHA configurations ...')
+        vcsa_ha = vc.post('/rest/vcenter/vcha/cluster?action=get')
+        print('Status : {}'.format(vcsa_ha['value']))
+
+        print()
+        print()
+
+        # Retrieve all hostdata prior to compare with response of vSphere REST-API
+        esxis = vapi.get_host_objects()
+        print('>>> Datacenters')
+        vcsa_dc = vc.get('/rest/vcenter/datacenter')
+        for dc in vcsa_dc['value']:
+            print('Name: {}'.format(dc['name']))
+        print('>>> Clusters')
+        vcsa_clusters = vc.get('/rest/vcenter/cluster')
+        for cluster in vcsa_clusters['value']:
+            print('Name: {0}\t(DRS Enabled : {1}, HA Enabled : {2})'.format(cluster['name'], cluster['drs_enabled'], cluster['ha_enabled']))
+            print('>>>>>> Managed ESXi Host configs')
+            vcsa_hosts = vc.get('/rest/vcenter/host?filter.clusters={}'.format(cluster['cluster']))
+            for host in vcsa_hosts['value']:
+                esxi_parser = EsxiSoapParser()
+                host_info = dict()
+                print('>>>>>>>>> [ {} ] Network Configurations'.format(host['name']))
+                target_host = [esxi for esxi in esxis if esxi.name == host['name']][0]
+                host_pnics = esxi_parser.get_host_pnics(target_host)
+                host_vnics = esxi_parser.get_host_vnics(target_host)
+                host_vswitches = esxi_parser.get_host_vswitches(target_host)
+                host_portgroups = esxi_parser.get_host_portgroups(target_host)
+                host_info.update({
+                    'pnics': host_pnics,
+                    'vswitches': host_vswitches,
+                    'portgroups': host_portgroups,
+                    'vnics': host_vnics
+                })
+                print(json.dumps(host_info, indent=3, separators=(',', ': ')))
+                print('>>>>>>>>> [ {} ] SSH configurations'.format(host['name']))
+                print('SSH service :\t{}'.format(esxi_parser.get_host_ssh_status(target_host)))
+                print()
+    print()
+
+    # TODO: Return JSON value with parsed
+    return None
 
 
 def get_nsxt_configs(config):
@@ -178,6 +244,7 @@ def get_vrli_configs(config):
         print('>>>>>> vIDM')
         print('Status: {}'.format(vidm_status['state']))
         print(json.dumps(vidms, indent=3, separators=(',', ': ')))
+        print()
 
     # TODO: Should be return JSON value simplified
     return None
@@ -193,34 +260,35 @@ def get_vrops_configs(config):
         vrops = VROps(ipaddress=VROPS_IPADDR, username=VROPS_USERNAME, password=VROPS_PASSWORD)
 
         # Fetch all info from CaSA API
-        node_conf = vrops.casa_get('/casa/node/config')
+        cluster_conf = vrops.casa_get('/casa/cluster/config')
         ip_conf = vrops.casa_get('/casa/node/status')
         # Fetch all info from Suite API
-        auth_src_ids = [i['id'] for i in vrops.get('/suite-api/api/auth/sources')['sources']]
+        versions = vrops.get('/suite-api/api/versions/current')
+        auth_sources = vrops.get('/suite-api/api/auth/sources')
         mp_info = vrops.get('/suite-api/api/solutions')
         adapter_info = vrops.get('/suite-api/api/adapters')
         snmp_info = vrops.get('/suite-api/api/alertplugins')
 
         print('>>> Version information')
-        print('{}'.format(node_conf['product_version']))
+        print('{}'.format(versions['releaseName']))
+        print('Release Date: {}'.format(versions['humanlyReadableReleaseDate']))
 
-        print('>>> Network information ...')
-        print('IP Address: \t{}'.format(ip_conf['address']))
-        print('Netmask: \t{}'.format(node_conf['network_properties']['network1_netmask']))
-        print('Gateway: \t{}'.format(node_conf['network_properties']['default_gateway']))
+        print('>>> Cluster configurations')
+        for node in cluster_conf['slices']:
+            print('Node: {}'.format(node['node_name']))
+            print('IP Address: \t{}'.format(ip_conf['address']))
+            print('Deployment Role: {}'.format(node['node_type']))
+            # print('IP Address: {}'.format(node['']))
+            print('Netmask: {}'.format(node['network_properties']['network1_netmask']))
+            print('Gateway: {}'.format(node['network_properties']['default_gateway']))
+            print('DNS Servers: \t{}'.format(node['network_properties']['domain_name_servers']))
+            print('Domain Name: \t{}'.format(node['network_properties']['domain_name']))
+            print('NTP Servers: \t{}'.format(node['ntp_servers']))
+            print()
 
-        print('>>> Hostname configuration ...')
-        print('Nodename: \t{}'.format(node_conf['node_name']))
-        print('Deployment Role: \t{}'.format(node_conf['node_type']))
-
-        print('>>> DNS configuration ...')
-        print('DNS Servers: \t{}'.format(node_conf['network_properties']['domain_name_servers']))
-        print('Domain Name: \t{}'.format(node_conf['network_properties']['domain_name']))
-
-        print('>>> NTP configuration ...')
-        print('NTP Servers: \t{}'.format(node_conf['ntp_servers']))
         print()
         print('>>> Authentication sources')
+        auth_src_ids = [i['id'] for i in auth_sources['sources']]
         for auth_src_id in auth_src_ids:
             auth_detail = vrops.get('/suite-api/api/auth/sources/{}'.format(auth_src_id))
             auth_name = auth_detail.get('name', None)
@@ -253,107 +321,41 @@ def get_vrops_configs(config):
     return None
 
 
-def main():
+if __name__ == "__main__":
+
     CONFIG_FILE_PATH = './config.yaml'
     if os.path.exists(CONFIG_FILE_PATH):
+        print('>>> Loading input parameter file : [ {} ]'.format(CONFIG_FILE_PATH))
         configs = read_config_from_file(conf_file_path=CONFIG_FILE_PATH)
     else:
         print('Provided configuration file path is wrong.')
         print('Configuration file is expected to be allocated on ./config.yaml.')
         sys.exit(1)
 
-    # # TODO: Split all functions by each product
-    # print('-----------------------------------------------------------')
-    # print('vCenter Server Configuration')
-    # print('-----------------------------------------------------------')
-    # for vcsas in config['vcenter']:
-    #     for vcsa in vcsas.values():
-    #         IPADDRESS = vcsa['hostname']
-    #         USERNAME = vcsa['username']
-    #         PASSWORD = vcsa['password']
-    #         print('vCenter Server: {}'.format(IPADDRESS))
-    #         vc = VCenter(ipaddress=IPADDRESS, username=USERNAME, password=PASSWORD)
-    #         vapi = VApi(ipaddress=IPADDRESS, username=USERNAME, password=PASSWORD)
-
-    #         print('>>> vCSA network configuration ...')
-    #         vcsa_networks = vc.get('/rest/appliance/networking/interfaces')
-    #         print('IP address: \t{}'.format(vcsa_networks['value'][0]['ipv4']['address']))
-    #         print('Subnet Prefix: \t{}'.format(vcsa_networks['value'][0]['ipv4']['prefix']))
-    #         print('Gateway: \t{}'.format(vcsa_networks['value'][0]['ipv4']['default_gateway']))
-
-    #         print('>>> vCSA hostname information ...')
-    #         vcsa_hostnames = vc.get('/rest/appliance/networking/dns/hostname')
-    #         print('Hostname: \t{}'.format(vcsa_hostnames['value']))
-
-    #         print('>>> vCSA DNS configuration ...')
-    #         vcsa_dns = vc.get('/rest/appliance/networking/dns/servers')
-    #         print('DNS Servers: \t{}'.format(vcsa_dns['value']['servers']))
-
-    #         print('>>> vCSA NTP configuration ...')
-    #         vcsa_ntp = vc.get('/rest/appliance/ntp')
-    #         print('NTP Servers: \t{}'.format(vcsa_ntp['value']))
-
-    #         print('>>> vCSA SSH configuration ...')
-    #         vcsa_ssh_status = vc.get('/rest/appliance/access/ssh')
-    #         print('SSH Services: {}'.format('Running' if vcsa_ssh_status['value'] == True else 'Not Running'))
-
-    #         print('>>> vCHA configurations ...')
-    #         vcsa_ha = vc.post('/rest/vcenter/vcha/cluster?action=get')
-    #         print('Status : {}'.format(vcsa_ha['value']))
-
-    #         print()
-    #         print('-----------------------------------------------------------')
-    #         print()
-    #         # Retrieve all hostdata prior to compare with response of vSphere REST-API
-    #         esxis = vapi.get_host_objects()
-    #         print('>>> Datacenters')
-    #         vcsa_dc = vc.get('/rest/vcenter/datacenter')
-    #         for dc in vcsa_dc['value']:
-    #             print('Name: {}'.format(dc['name']))
-    #         print('>>> Clusters')
-    #         vcsa_clusters = vc.get('/rest/vcenter/cluster')
-    #         for cluster in vcsa_clusters['value']:
-    #             print('Name: {0}\t(DRS Enabled : {1}, HA Enabled : {2})'.format(cluster['name'], cluster['drs_enabled'], cluster['ha_enabled']))
-    #             print('>>>>>> Managed ESXi Host configs')
-    #             vcsa_hosts = vc.get('/rest/vcenter/host?filter.clusters={}'.format(cluster['cluster']))
-    #             for host in vcsa_hosts['value']:
-    #                 esxi_parser = EsxiSoapParser()
-    #                 host_info = dict()
-    #                 print('>>>>>>>>> [ {} ] Network Configurations'.format(host['name']))
-    #                 target_host = [esxi for esxi in esxis if esxi.name == host['name']][0]
-    #                 host_pnics = esxi_parser.get_host_pnics(target_host)
-    #                 host_vnics = esxi_parser.get_host_vnics(target_host)
-    #                 host_vswitches = esxi_parser.get_host_vswitches(target_host)
-    #                 host_portgroups = esxi_parser.get_host_portgroups(target_host)
-    #                 host_info.update({
-    #                     'pnics': host_pnics,
-    #                     'vswitches': host_vswitches,
-    #                     'portgroups': host_portgroups,
-    #                     'vnics': host_vnics
-    #                 })
-    #                 print(json.dumps(host_info, indent=3, separators=(',', ': ')))
-    #                 print('>>>>>>>>> [ {} ] SSH configurations'.format(host['name']))
-    #                 print('SSH service : {}'.format(esxi_parser.get_host_ssh_status(target_host)))
-    #                 print()
-
+    print('>>> Start collecting configurations, this might take some time ...')
+    print()
+    print('-----------------------------------------------------------')
+    print()
+    print('### vCenter Server ')
+    print()
+    vcenter_configs = get_vcenter_configs(config=configs.get('vcenter'))
     print()
     print('-----------------------------------------------------------')
     print()
     print('### NSX-T Manager')
     print()
-    # nsxt_configs = get_nsxt_configs(config=configs.get('nsx'))
+    nsxt_configs = get_nsxt_configs(config=configs.get('nsx'))
     print()
     print('-----------------------------------------------------------')
     print()
     print('### VMware Integrated OpenStack')
     print()
-    # vio_configs = get_vio_configs(config=configs.get('vio'))
+    vio_configs = get_vio_configs(config=configs.get('vio'))
     print()
     print('-----------------------------------------------------------')
     print()
     print('### vRealize Operations Manager')
     print()
-    # # TODO: Add functions to get deployment rule(currently vROps in Labs are non-clustered)
     vrops_configs = get_vrops_configs(config=configs.get('vrops'))
     print()
     print('-----------------------------------------------------------')
@@ -368,9 +370,9 @@ def main():
     print()
     vrni_configs = get_vrni_configs(config=configs.get('vrni'))
     print()
-    print('All configuration dumped !!')
+    print('-----------------------------------------------------------')
+    print()
+    print('>>> All configuration dumped !!')
+    # TODO: print path of logfile and dumped file as stdout
 
-    sys.exit(1)
-
-if __name__ == "__main__":
-    main()
+    sys.exit(0)
