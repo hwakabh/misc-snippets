@@ -39,16 +39,12 @@ def get_nsxt_configs(config):
             print('MTU: \t\t{}'.format(net['mtu']))
             print()
 
-        print('>>> Hostname configuration ...')
         hostname = nsx.get('/api/v1/node')
-        print('Hostname: \t{}'.format(hostname['fully_qualified_domain_name']))
-
-        print('>>> DNS configuration ...')
         dns = nsx.get('/api/v1/node/network/name-servers')
-        print('DNS Servers: \t{}'.format(dns['name_servers']))
-
-        print('>>> NTP configuration ...')
         ntp = nsx.get('/api/v1/node/services/ntp')
+
+        print('Hostname: \t{}'.format(hostname['fully_qualified_domain_name']))
+        print('DNS Servers: \t{}'.format(dns['name_servers']))
         print('NTP Servers: \t{}'.format(ntp['service_properties']['servers']))
 
     # Return JSON value with parsed
@@ -62,29 +58,28 @@ def get_vio_configs(config):
         VIO_PASSWORD = cfg['password']
         print('------ Starting config_dump for VIO Manager: {} -----'.format(VIO_MGR))
         viomgr = Vio(ipaddress=VIO_MGR, username=VIO_USERNAME, password=VIO_PASSWORD)
+        vio_networks = viomgr.get('/apis/vio.vmware.com/v1alpha1/namespaces/openstack/vioclusters/viocluster1')
+        vio_nodes = viomgr.get('/api/v1/nodes')
 
         print('>>> Network information ...')
-        vio_networks = viomgr.get('/apis/vio.vmware.com/v1alpha1/namespaces/openstack/vioclusters/viocluster1')
         print('> Management Network')
         print('IP Ranges: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['ip_ranges']))
         print('Netmask: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['netmask']))
         print('Gateway: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['gateway']))
+        print('DNS Servers: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['dns']))
+        print()
         print('> API Network')
         print('IP Ranges: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['ip_ranges']))
         print('Netmask: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['netmask']))
         print('Gateway: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['gateway']))
-        vio_nodes = viomgr.get('/api/v1/nodes')
+        print('DNS Servers: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['dns']))
+        print()
         print('> manager/controller nodes')
         for node in vio_nodes['items']:
             print('Nodename: \t{}'.format(node['metadata']['name']))
             print('  PodCIDR: \t{}'.format(node['spec']['podCIDR']))
             print('  IntIP: \t{}'.format(node['status']['addresses'][0]['address']))
             print('  ExtIP: \t{}'.format(node['status']['addresses'][1]['address']))
-        print('>>> VIO DNS configurations ...')
-        print('> Management Network')
-        print('DNS Servers: \t{}'.format(vio_networks['spec']['cluster']['network_info'][0]['static_config']['dns']))
-        print('> API Network')
-        print('DNS Servers: \t{}'.format(vio_networks['spec']['cluster']['network_info'][1]['static_config']['dns']))
         # TODO: Research NTP API Endpoints for Kubernetes
 
     return None
@@ -98,30 +93,32 @@ def get_vrni_configs(config):
         VRNI_DOMAIN = cfg['domain']
         print('------ Starting config_dump for vRNI: {} -----'.format(VRNI_IPADDR))
         vrni = VRni(ipaddress=VRNI_IPADDR, username=VRNI_USERNAME, password=VRNI_PASSWORD, domain=VRNI_DOMAIN)
+        version_info = vrni.get('/api/ni/info/version')
+        nodes_info = vrni.get('/api/ni/infra/nodes')
+        # cluster_info = vrni.get('/api/ni/entities/clusters')
+        # host_info = vrni.get('/api/ni/entities/hosts')
 
         print('>>> Version information')
-        version_info = vrni.get('/api/ni/info/version')
         print('API Version : {0}'.format(version_info['api_version']))
 
-        print('>>> Node information')
+        print('>>> Nodes information')
         # Fetch all node ids configured
-        nodes_info = vrni.get('/api/ni/infra/nodes')
         # print(vrni_nodes)
         ni_node_ids = [i['id'] for i in nodes_info['results']]
         for node_id in ni_node_ids:
             node = vrni.get('/api/ni/infra/nodes/{}'.format(node_id))
-            print(node)
+            print('Node ID: {0} (internal: {1})'.format(node['id'], node['node_id']))
+            print('IP Address: {}'.format(node['ip_address']))
+            print('Deployment Role: {}'.format(node['node_type']))
 
-        cluster_info = vrni.get('/api/ni/entities/clusters')
-        print(cluster_info)
-        host_info = vrni.get('/api/ni/entities/hosts')
-        print(host_info)
+        # print(cluster_info)
+        # print(host_info)
 
-        user_groups = vrni.get('/api/ni/settings/user-groups')
-        print(user_groups)
+        # user_groups = vrni.get('/api/ni/settings/user-groups')
+        # print(user_groups)
 
-        snmp_info = vrni.get('/api/ni/settings/snmp/profiles')
-        print(snmp_info)
+        # snmp_info = vrni.get('/api/ni/settings/snmp/profiles')
+        # print(snmp_info)
 
     # TODO: Return JSON value with parsed
     return None
@@ -135,46 +132,50 @@ def get_vrli_configs(config):
         VRLI_PROVIDER = cfg['provider']
         print('------ Starting config_dump for vRLI: {} -----'.format(VRLI_IPADDR))
         vrli = VRli(ipaddress=VRLI_IPADDR, username=VRLI_USERNAME, password=VRLI_PASSWORD, provider=VRLI_PROVIDER)
+        version_info = vrli.get('/api/v1/version')
+        cluster_info = vrli.get('/api/v1/cluster/vips')
+        node_info = vrli.get('/api/v1/cluster/nodes')
+        ntp_info = vrli.get('/api/v1/time/config')
+        cp_info = vrli.get('/api/v1/content/contentpack/list')
+        vsphere_info = vrli.get('/api/v1/vsphere')
+        vrops_info = vrli.get('/api/v1/vrops')
+        smtp_info = vrli.get('/api/v1/notification/channels')
+        ad_info = vrli.get('/api/v1/ad')
+        vidm_status = vrli.get('/api/v1/vidm/status')
+        vidms = vrli.get('/api/v1/vidm')
 
         print('>>> Version information')
-        version_info = vrli.get('/api/v1/version')
         print('{0} (Release Type: {1})'.format(version_info['version'], version_info['releaseName']))
+        print()
 
         print('>>> Cluster configurations ...')
-        cluster_info = vrli.get('/api/v1/cluster/vips')
-        print(cluster_info)
-        # vrli_cluster_detail = vrli_api.get('/api/v1/cluster/vips/{}'.format(vrli_clusters['vips'][0]['uuid']))
-        # print(vrli_cluster_detail)
-        node_info = vrli.get('/api/v1/cluster/nodes')
-        print(node_info)
-        print('>>> NTP Configurations ...')
-        ntp_info = vrli.get('/api/v1/time/config')
-        print(ntp_info['ntpConfig']['ntpServers'])
+        print('> vIP : {0} (FQDN : {1})'.format(cluster_info['vips'][0]['ipAddress'], cluster_info['vips'][0]['fqdn']))
+        print('> proxy-node')
+        for node in node_info['nodes']:
+            print('Node ID: {}'.format(node['id']))
+            print('IP Address: {}'.format(node['ip']))
+            print('Subnet: {}'.format(node['netmask']))
+            print('Gateway: {}'.format(node['gateway']))
+            print('DNS Server: {}'.format(node['dnsServers']))
+        print('NTP Servers : {}'.format(ntp_info['ntpConfig']['ntpServers']))
+        print()
 
         print('>>> Content Pack configured ...')
-        cp_info = vrli.get('/api/v1/content/contentpack/list')
         for cp in cp_info['contentPackMetadataList']:
             print('{0} (formatVersion: {1}, contentVersion: {2})'.format(cp['name'], cp['formatVersion'], cp['contentVersion']))
         print('>>> Products integrated')
-        vsphere_info = vrli.get('/api/v1/vsphere')
         # vrli_vsphere = vrli_api.get('/api/v1/vsphere/{}'.format('vcsa02.nfvlab.local'))
         print(vsphere_info)
-        vrops_info = vrli.get('/api/v1/vrops')
         print(vrops_info)
 
-        ## Download & Extract configuration dump via REST-API
         print('>>> SMTP Configurations ...')
-        smtp_info = vrli.get('/api/v1/notification/channels')
         print(smtp_info)
 
         print('>>> Authentication source configurations ...')
         print('>>>>>> Active Directories')
-        ad_info = vrli.get('/api/v1/ad')
         print(ad_info)
         print('>>>>>> vIDM')
-        vidm_status = vrli.get('/api/v1/vidm/status')
         print('Status: {}'.format(vidm_status['state']))
-        vidms = vrli.get('/api/v1/vidm')
         print(json.dumps(vidms, indent=3, separators=(',', ': ')))
 
     # TODO: Should be return JSON value simplified
