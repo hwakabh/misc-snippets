@@ -17,6 +17,31 @@ echo '>>> Install kubectl from source'
 curl -s -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
 echo ''
 
+# Case if installing with yum repository
+# echo '>>> Enable yum repository for kubernetes'
+# cat << EOF > /etc/yum.repos.d/kubernetes.repo
+# [kubernetes]
+# name=Kubernetes
+# baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+# enabled=1
+# gpgcheck=1
+# repo_gpgcheck=1
+# gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+# EOF
+#
+# echo ''
+#
+# echo '>>> Checking yum repository configs before downloading ...'
+# ls -al /etc/yum.repos.d/
+# echo ''
+# cat /etc/yum.repos.d/kubernetes.repo
+# echo ''
+# yum -y repolist
+# echo ''
+# echo 'Downloading kubectl'
+# yum -y install kubectl
+# echo ''
+
 echo '>>> Post installation of kubectl'
 ls -al ./kubectl
 chmod +x ./kubectl
