@@ -1,0 +1,16 @@
+---
+amazon:
+  name: Amazon, Inc.
+  code: AMZN
+  year: 1994
+  founder: Jeff Bezos
+google:
+  name: Google, Inc.
+  code: GOOGL
+  year: 1998
+  founder: Larry Page
+vmware:
+  name: VMware, Inc.
+  code: VMW
+  year: 2012
+  founder: Pat Gelsinger

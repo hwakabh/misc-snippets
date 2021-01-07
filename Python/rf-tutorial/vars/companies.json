@@ -1,0 +1,20 @@
+{
+    "vmware": {
+        "name": "VMware, Inc.",
+        "code": "VMW",
+        "year": 2012,
+        "foudner": "Pat Gelsinger"
+    },
+    "google": {
+        "name": "Google, Inc.",
+        "code": "GOOGL",
+        "year": 1998,
+        "foudner": "Larry Page"
+    },
+    "amazon": {
+        "name": "Amazon, Inc.",
+        "code": "AMZN",
+        "year": 1994,
+        "foudner": "Jeff Bezos"
+    }
+}
