@@ -36,3 +36,6 @@ Downloading WebDriver for browser: "chrome"
 Driver binary downloaded to: "PATH_OF_YOUR_WORKSPACE/chromedriver"
 Symlink created: PATH_OF_YOUR_WORKSPACE/chromedriver
 ```
+
+Note that `webdrivermanager` will configure appropriate `PYTHONPATH` even if you'd use virtualenv for robotframeowork.  
+Default path if you using virtualenv will be: `PATH_OF_YOUR_WORKSPACE/venv/bin/chromedriver`
