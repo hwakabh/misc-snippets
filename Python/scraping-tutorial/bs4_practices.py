@@ -1,9 +1,21 @@
 from bs4 import BeautifulSoup
+# require: pip install google-cloud-translate==2.0.1
+from google.cloud import translate_v2 as translate
+import os
 import requests
 
-
+# Setup for Scraping
 target_url = 'https://dangcongsan.vn/thoi-su'
 h = {'User-Agent': 'Mozilla'}
+
+# Setup for Translate API
+print('>> Translator client instanciated')
+client = translate.Client()
+
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', None)
+if GOOGLE_APPLICATION_CREDENTIALS is None:
+    print('Error: No credentials file provided')
+
 
 print(f'>> Starting to scrape HTML from {target_url}')
 
@@ -25,14 +37,19 @@ for n in news:
     # note that `find()` returns only first element which hit the conditions
     date = n.find('div', {'class': 'i-date'}).text
     print(f'Date Published: {date}')
+    article_fullpath = n.find('a').attrs['href']
+    print(f'Pull article path:  {article_fullpath}')
+    image_path = n.find('div').find('img').attrs['src']
+    print(f'Image src Path:   {image_path}')
+    print('')
 
     title = n.find('a').attrs['title']
     print(f'Article Title:    {title}')
-    article_fullpath = n.find('a').attrs['href']
-    print(f'Pull article path:  {article_fullpath}')
-
-    image_path = n.find('div').find('img').attrs['src']
-    print(f'Image src Path:   {image_path}')
-
+    ret_title = client.translate(title, target_language='ja')['translatedText']
+    print(f'Article Title(JP):   {ret_title}')
+    print('')
     catch_text = n.find('span').text
     print(f'Header Text :\n{catch_text}')
+    ret_text = client.translate(catch_text, target_language='ja')['translatedText']
+    print(f'Header Text(JP):\n{ret_text}')
+    print('')
