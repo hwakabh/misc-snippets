@@ -10,7 +10,7 @@ lxml==4.6.2
 paramiko==2.7.2
 pycparser==2.20
 PyNaCl==1.4.0
-PyYAML==5.3.1
+PyYAML==5.4
 requests==2.25.1
 robotframework==3.2.2
 robotframework-sshlibrary==3.6.0
