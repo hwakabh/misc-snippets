@@ -68,7 +68,7 @@ function postSlack(payload) {
     "payload" : JSON.stringify(payload)
   }
   // Slack Webhook URL
-  var url = "https://hooks.slack.com/services/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";
+  var url = process.env('HOOK_URL');
   var response = UrlFetchApp.fetch(url, options);
   var content = response.getContentText("UTF-8");
 }
