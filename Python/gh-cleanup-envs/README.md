@@ -20,4 +20,8 @@ Please refer to [GitHub Official documentations](https://docs.github.com/en/auth
 ```bash
 # Set personal access token as environmental variables in your shell
 $ export TOKEN='ghp_XXXXXXXXXXXXXXX'
+
+# Provide GitHub username & reponame to determine target URL
+$ export GH_USERNAME='hwakabh'
+$ export GH_REPONAME='gist'
 ```
