@@ -7,13 +7,21 @@ import requests
 gh_username = 'hwakabh'
 gh_reponame = 'waseda-mochida'
 
+print('Fetching GitHub username & repository name from shell')
+GH_USERNAME = os.environ.get('GH_USERNAME', None)
+GH_REPONAME = os.environ.get('GH_REPONAME', None)
+if (GH_USERNAME is None) or (GH_REPONAME is None):
+    print('  GH_USERNAME or GH_REPONAME not provides, please set environmental variable with your shell.')
+    sys.exit(1)
+
 print('Fetching GitHub PAT from shell')
 TOKEN = os.environ.get('TOKEN', None)
 if TOKEN is None:
     print('  TOKEN not provides, please set environmental variable with your shell.')
     sys.exit(1)
 
-url = f'https://api.github.com/repos/{gh_username}/{gh_reponame}/deployments'
+
+url = f'https://api.github.com/repos/{GH_USERNAME}/{GH_REPONAME}/deployments'
 header = {'authorization': 'token ' + TOKEN}
 
 res = requests.get(url)
@@ -38,6 +46,6 @@ if len(id_urls) != 0:
         requests.delete(i, headers=header)
         print('  Done')
 
-    print(f'Cleaned up all deployments in repo: {gh_reponame}')
+    print(f'Cleaned up all deployments in repo: {GH_REPONAME}')
 else:
-    print(f'No environment found in repo: {gh_reponame}')
+    print(f'No environment found in repo: {GH_REPONAME}')
