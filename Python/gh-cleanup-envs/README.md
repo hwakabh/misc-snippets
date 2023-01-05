@@ -23,5 +23,5 @@ $ export TOKEN='ghp_XXXXXXXXXXXXXXX'
 
 # Provide GitHub username & reponame to determine target URL
 $ export GH_USERNAME='hwakabh'
-$ export GH_REPONAME='gist'
+$ export GH_REPONAME='gists'
 ```
