@@ -18,3 +18,11 @@
 	path = sh/docker_installer.sh
 	url = git@gist.github.com:dbc8252e7f88d71226990be4b252d712.git
 	branch = main
+[submodule "gs/slack_hook_global_holidays.gs"]
+	path = gs/slack_hook_global_holidays.gs
+	url = git@gist.github.com:aae9bccd36d63519078c7f02c7cf0082.git
+	branch = main
+[submodule "js/restClient.js"]
+	path = js/restClient.js
+	url = git@gist.github.com:f768bd377603d451f013e38ec3ffb19d.git
+	branch = main
