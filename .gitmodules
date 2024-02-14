@@ -34,3 +34,7 @@
 	path = py/bs4_fetch_images
 	url = git@gist.github.com:467f84af99f89aeda3c352b279c64783.git
 	branch = main
+[submodule "rb/hello_sonic_pi"]
+	path = rb/hello_sonic_pi
+	url = git@gist.github.com:2b043870efb765a7443e3c36da63dd0f.git
+	branch = main
