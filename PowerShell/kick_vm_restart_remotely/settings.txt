@@ -1,2 +1,0 @@
-primaryChildIp = "172.16.110.248"
-secondaryChildIp = "172.16.110.29"
