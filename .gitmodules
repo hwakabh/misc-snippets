@@ -2,3 +2,7 @@
 	path = py/cleanup_github_deploys
 	url = git@gist.github.com:32ce58412d108dcdba129f4032e795b0.git
 	branch = main
+[submodule "py/dump_tabelog"]
+	path = py/dump_tabelog
+	url = git@gist.github.com:db56c2d9038535d8c228a5874b058355.git
+	branch = main
