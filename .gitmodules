@@ -22,3 +22,15 @@
 	path = js/restClient.js
 	url = git@gist.github.com:f768bd377603d451f013e38ec3ffb19d.git
 	branch = main
+[submodule "py/deepl_restapi"]
+	path = py/deepl_restapi
+	url = git@gist.github.com:dd674267af09a7d702eb69ed32502a54.git
+	branch = main
+[submodule "py/bs4_google_translate"]
+	path = py/bs4_google_translate
+	url = git@gist.github.com:702dd853b045eafb37a21b6de0737d63.git
+	branch = main
+[submodule "py/bs4_fetch_images"]
+	path = py/bs4_fetch_images
+	url = git@gist.github.com:467f84af99f89aeda3c352b279c64783.git
+	branch = main
