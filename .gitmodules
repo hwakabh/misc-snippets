@@ -1,0 +1,4 @@
+[submodule "py/cleanup_github_deploys"]
+	path = py/cleanup_github_deploys
+	url = git@gist.github.com:32ce58412d108dcdba129f4032e795b0.git
+	branch = main
