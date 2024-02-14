@@ -1,0 +1,36 @@
+[submodule "py/cleanup_github_deploys"]
+	path = py/cleanup_github_deploys
+	url = git@gist.github.com:32ce58412d108dcdba129f4032e795b0.git
+	branch = main
+[submodule "py/dump_tabelog"]
+	path = py/dump_tabelog
+	url = git@gist.github.com:db56c2d9038535d8c228a5874b058355.git
+	branch = main
+[submodule "sh/schedule_gitlab_backups"]
+	path = sh/schedule_gitlab_backups
+	url = git@gist.github.com:4cf2d5d959ec2aca26990033efe634c3.git
+	branch = main
+[submodule "sh/kubectl_installer.sh"]
+	path = sh/kubectl_installer.sh
+	url = git@gist.github.com:de045e80cadd7e2e43fbe6caf8b5ea61.git
+	branch = main
+[submodule "sh/docker_installer.sh"]
+	path = sh/docker_installer.sh
+	url = git@gist.github.com:dbc8252e7f88d71226990be4b252d712.git
+	branch = main
+[submodule "js/restClient.js"]
+	path = js/restClient.js
+	url = git@gist.github.com:f768bd377603d451f013e38ec3ffb19d.git
+	branch = main
+[submodule "py/deepl_restapi"]
+	path = py/deepl_restapi
+	url = git@gist.github.com:dd674267af09a7d702eb69ed32502a54.git
+	branch = main
+[submodule "py/bs4_google_translate"]
+	path = py/bs4_google_translate
+	url = git@gist.github.com:702dd853b045eafb37a21b6de0737d63.git
+	branch = main
+[submodule "py/bs4_fetch_images"]
+	path = py/bs4_fetch_images
+	url = git@gist.github.com:467f84af99f89aeda3c352b279c64783.git
+	branch = main
