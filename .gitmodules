@@ -38,3 +38,6 @@
 	path = rb/hello_sonic_pi
 	url = git@gist.github.com:2b043870efb765a7443e3c36da63dd0f.git
 	branch = main
+[submodule "gs/slack_hook_global_holidays.gs"]
+	path = gs/slack_hook_global_holidays.gs
+	url = git@gist.github.com:aae9bccd36d63519078c7f02c7cf0082.git
