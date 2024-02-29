@@ -1,0 +1,77 @@
+[
+  {
+    "name": "bugs",
+    "color": "d73a4a",
+    "description": "Something isn't working"
+  },
+  {
+    "name": "chore",
+    "color": "a8582c",
+    "description": "Not affected to application code changes"
+  },
+  {
+    "name": "ci",
+    "color": "e9faaf",
+    "description": "Topics on workflows or automations"
+  },
+  {
+    "name": "dependabot",
+    "color": "bfdadc",
+    "description": "PRs from dependabot"
+  },
+  {
+    "name": "deps",
+    "color": "0052cc",
+    "description": "Changes on app dependencies"
+  },
+  {
+    "name": "docs",
+    "color": "d93f0b",
+    "description": "Improvements or additions to documentation"
+  },
+  {
+    "name": "features",
+    "color": "a2eeef",
+    "description": "New feature or request"
+  },
+  {
+    "name": "lang(gas)",
+    "color": "d1a995",
+    "description": "Google App Script"
+  },
+  {
+    "name": "lang(js)",
+    "color": "d2de87",
+    "description": "JavaScript (vanila JS)"
+  },
+  {
+    "name": "lang(python)",
+    "color": "7057ff",
+    "description": "Python"
+  },
+  {
+    "name": "lang(ruby)",
+    "color": "410715",
+    "description": "Ruby"
+  },
+  {
+    "name": "lang(shell)",
+    "color": "0075ca",
+    "description": "ShellScript"
+  },
+  {
+    "name": "secutiry",
+    "color": "e4e669",
+    "description": "Changes with security perspectives"
+  },
+  {
+    "name": "staled",
+    "color": "ffffff",
+    "description": "Issue not actively updated"
+  },
+  {
+    "name": "wontfix",
+    "color": "ffffff",
+    "description": "This will not be worked on"
+  }
+]

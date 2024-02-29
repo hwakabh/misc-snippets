@@ -1,0 +1,65 @@
+---
+name: Generic Issue Template
+about: Describe this issue template's purpose here.
+title: ''
+labels: ''
+assignees: ''
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the following fields to raise generic issues!
+  - type: dropdown
+    id: submodules
+    attributes:
+      label: What submodules are you seeing the problem on?
+      multiple: true
+      options:
+        - gs/slackhooks-world-holidays
+        - js/http-tiny-client
+        - py/bs4_image_downloader
+        - py/github_wipeout_deployments
+        - py/selenium_cafe_migrations
+        - py/translate_client_deeplapis
+        - py/translate_client_googleapis
+        - rb/hello_sonic_pi
+        - sh/centos_clivm_setup
+        - sh/centos_docker_install
+        - sh/gitlab_scheduled_backups
+        - Nothing above
+    validations:
+      required: true
+  - type: input
+    id: gist
+    attributes:
+      label: Gist Links
+      description: Which Gist codes will be affected?
+      placeholder: ex) https://gist.github.com/hwakabh/f768bd377603d451f013e38ec3ffb19d
+    validations:
+      required: false
+  - type: textarea
+    id: asis
+    attributes:
+      label: AsIs
+      description: Current status of code basis, or brief issue descriptions
+      value: ""
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: justifications
+    attributes:
+      label: Justifications
+      description: Describe the reason why this issue should be resolved.
+      value: ""
+      render: markdown
+    validations:
+      required: false
+  - type: textarea
+    id: todo
+    attributes:
+      label: ToDo
+      value: ""
+      render: markdown
+    validations:
+      required: true
