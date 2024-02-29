@@ -1,0 +1,30 @@
+lang(gas):
+- changed-files:
+  - any-glob-to-any-file: ['gs/**/*']
+
+lang(js):
+- changed-files:
+  - any-glob-to-any-file: ['js/**/*']
+
+lang(python):
+- changed-files:
+  - any-glob-to-any-file: ['py/**/*']
+
+lang(ruby):
+- changed-files:
+  - any-glob-to-any-file: ['rb/**/*']
+
+lang(shell):
+- changed-files:
+  - any-glob-to-any-file: ['sh/**/*']
+
+ci:
+- changed-files:
+  - any-glob-to-any-file: ['.github/**/*']
+
+docs:
+- changed-files:
+  - any-glob-to-any-file: ['**/*.md']
+
+bug:
+- head-branch: ['^fix/', '^hotfix/']
