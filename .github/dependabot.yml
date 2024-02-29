@@ -14,12 +14,18 @@ updates:
       - "hwakabh"
   - package-ecosystem: "gitsubmodule"
     directory: "/"
-    # submodules only contains dependencies file
-    allow:
-      - dependency-name: "py/dump_tabelog"
     schedule:
       interval: "daily"
       time: "07:00"
       timezone: "Asia/Tokyo"
     labels:
       - "dependabot"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "07:00"
+      timezone: "Asia/Tokyo"
+    labels:
+      - "dependabot"
+      - "lang:python"
