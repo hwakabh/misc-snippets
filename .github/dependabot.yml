@@ -20,6 +20,9 @@ updates:
       timezone: "Asia/Tokyo"
     labels:
       - "dependabot"
+      - "chore"
+    reviewers:
+      - "hwakabh"
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
@@ -29,3 +32,16 @@ updates:
     labels:
       - "dependabot"
       - "lang:python"
+    reviewers:
+      - "hwakabh"
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "07:00"
+      timezone: "Asia/Tokyo"
+    labels:
+      - "dependabot"
+      - "lang:js"
+    reviewers:
+      - "hwakabh"
