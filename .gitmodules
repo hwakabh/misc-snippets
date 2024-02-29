@@ -16,9 +16,6 @@
 [submodule "rb/hello_sonic_pi"]
 	path = rb/hello_sonic_pi
 	url = git@gist.github.com:2b043870efb765a7443e3c36da63dd0f.git
-[submodule "js/simple-rest-client"]
-	path = js/simple-rest-client
-	url = git@gist.github.com:f768bd377603d451f013e38ec3ffb19d.git
 [submodule "gs/slackhooks-world-holidays"]
 	path = gs/slackhooks-world-holidays
 	url = git@gist.github.com:aae9bccd36d63519078c7f02c7cf0082.git
@@ -31,3 +28,6 @@
 [submodule "sh/gitlab_scheduled_backups"]
 	path = sh/gitlab_scheduled_backups
 	url = git@gist.github.com:4cf2d5d959ec2aca26990033efe634c3.git
+[submodule "js/http-tiny-client"]
+	path = js/http-tiny-client
+	url = git@gist.github.com:f768bd377603d451f013e38ec3ffb19d.git
