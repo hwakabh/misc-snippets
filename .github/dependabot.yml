@@ -31,6 +31,7 @@ updates:
       timezone: "Asia/Tokyo"
     labels:
       - "dependabot"
+      - "deps"
       - "lang:python"
     reviewers:
       - "hwakabh"
@@ -42,6 +43,7 @@ updates:
       timezone: "Asia/Tokyo"
     labels:
       - "dependabot"
+      - "deps"
       - "lang:js"
     reviewers:
       - "hwakabh"
