@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "07:00"
+      timezone: "Asia/Tokyo"
+    labels:
+      - "dependabot"
+      - "deps"
+      - "ci"
+    reviewers:
+      - "hwakabh"
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    # submodules only contains dependencies file
+    allow:
+      - dependency-name: "py/dump_tabelog"
+    schedule:
+      interval: "daily"
+      time: "07:00"
+      timezone: "Asia/Tokyo"
+    labels:
+      - "dependabot"
