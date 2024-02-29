@@ -6,22 +6,6 @@
 	path = py/dump_tabelog
 	url = git@gist.github.com:db56c2d9038535d8c228a5874b058355.git
 	branch = main
-[submodule "sh/schedule_gitlab_backups"]
-	path = sh/schedule_gitlab_backups
-	url = git@gist.github.com:4cf2d5d959ec2aca26990033efe634c3.git
-	branch = main
-[submodule "sh/kubectl_installer.sh"]
-	path = sh/kubectl_installer.sh
-	url = git@gist.github.com:de045e80cadd7e2e43fbe6caf8b5ea61.git
-	branch = main
-[submodule "sh/docker_installer.sh"]
-	path = sh/docker_installer.sh
-	url = git@gist.github.com:dbc8252e7f88d71226990be4b252d712.git
-	branch = main
-[submodule "js/restClient.js"]
-	path = js/restClient.js
-	url = git@gist.github.com:f768bd377603d451f013e38ec3ffb19d.git
-	branch = main
 [submodule "py/deepl_restapi"]
 	path = py/deepl_restapi
 	url = git@gist.github.com:dd674267af09a7d702eb69ed32502a54.git
@@ -38,6 +22,3 @@
 	path = rb/hello_sonic_pi
 	url = git@gist.github.com:2b043870efb765a7443e3c36da63dd0f.git
 	branch = main
-[submodule "gs/slack_hook_global_holidays.gs"]
-	path = gs/slack_hook_global_holidays.gs
-	url = git@gist.github.com:aae9bccd36d63519078c7f02c7cf0082.git
