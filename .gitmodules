@@ -10,9 +10,6 @@
 [submodule "py/selenium_cafe_migrations"]
 	path = py/selenium_cafe_migrations
 	url = git@gist.github.com:db56c2d9038535d8c228a5874b058355.git
-[submodule "py/github_wipeout_deployments"]
-	path = py/github_wipeout_deployments
-	url = git@gist.github.com:32ce58412d108dcdba129f4032e795b0.git
 [submodule "rb/hello_sonic_pi"]
 	path = rb/hello_sonic_pi
 	url = git@gist.github.com:2b043870efb765a7443e3c36da63dd0f.git
