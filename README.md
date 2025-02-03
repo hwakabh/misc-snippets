@@ -17,4 +17,5 @@ So the following operation will be required when we change snippets in Gist for 
 Note that these operations requires to clone this repo recursively, whereas by default `git clone` does not do this.
 ```shell
 % git clone --recursive git@github.com:hwakabh/gists.git
+% git fetch --all --prune --recurse-submodules=yes
 ```
